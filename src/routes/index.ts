@@ -1,9 +1,6 @@
 import { Router } from "express";
-import phonesRoutes from "./phones.routes";
-import rechargesRoutes from "./recharges.routes";
+import carriersRouter from "./carriers.routes";
 
 const router = Router();
-router.use(phonesRoutes);
-router.use(rechargesRoutes);
-
+router.use("/carriers", carriersRouter);
 export default router;
