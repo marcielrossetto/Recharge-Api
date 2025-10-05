@@ -27,14 +27,15 @@ created_at TIMESTAMP NOT NULL DEFAULT NOW()
 
 -- Telefones
 CREATE TABLE IF NOT EXISTS phones (
-id SERIAL PRIMARY KEY,
-number VARCHAR(20) NOT NULL UNIQUE, -- ex: 11971234112
-name VARCHAR(255) NOT NULL,
-description TEXT NOT NULL,
-carrier_id INT NOT NULL REFERENCES carriers(id),
-customer_id INT NOT NULL REFERENCES customers(id),
-created_at TIMESTAMP NOT NULL DEFAULT NOW()
+  id SERIAL PRIMARY KEY,
+  document VARCHAR(11) NOT NULL,
+  number VARCHAR(15) NOT NULL UNIQUE,
+  name TEXT NOT NULL,
+  description TEXT NOT NULL,
+  carrier_id INT NOT NULL REFERENCES carriers(id),
+  created_at TIMESTAMP NOT NULL DEFAULT NOW()
 );
+CREATE INDEX IF NOT EXISTS idx_phones_document ON phones(document);
 
 
 -- Recargas

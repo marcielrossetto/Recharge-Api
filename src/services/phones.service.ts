@@ -1,36 +1,27 @@
-import { upsertCustomerByDocument } from "../repositories/customers.repository";
-import { countPhonesByCustomer, getPhoneByNumber, insertPhone, listPhonesByCustomerDocument } from "../repositories/phones.repository";
+import { AppError } from "../middlewares/error";
+import * as carriersRepo from "../repositories/carriers.repository";
+import * as customersRepo from "../repositories/customers.repository";
+import * as phonesRepo from "../repositories/phones.repository";
 
 type CreatePhoneInput = {
-  number: string;
-  name: string;
-  description: string;
-  carrierId: number;
-  document: string;
+  document: string; number: string; name: string; description: string; carrier_id: number;
 };
 
 export async function createPhone(data: CreatePhoneInput) {
-  // número duplicado
-  const dup = await getPhoneByNumber(data.number);
-  if (dup) throw { type: "conflict", message: "phone number already exists" };
+  const { document, number, carrier_id, name, description } = data;
 
-  // garante cliente e limite de 3
-  const customerId = await upsertCustomerByDocument(data.document, data.name);
-  const total = await countPhonesByCustomer(customerId);
-  if (total >= 3) throw { type: "conflict", message: "customer already has 3 phones" };
+  if (await phonesRepo.findByNumber(number)) throw new AppError(409,"Phone number already exists");
+  if (!(await carriersRepo.findCarrierById(carrier_id))) throw new AppError(422,"Invalid carrier_id");
 
-  // cria
-  const created = await insertPhone({
-    number: data.number,
-    name: data.name,
-    description: data.description,
-    carrierId: data.carrierId,
-    customerId,
-  });
+  let customer = await customersRepo.findByDocument(document);
+  if (!customer) customer = await customersRepo.insertCustomer(document, name);
 
-  return created;
+  const total = await phonesRepo.countByDocument(document);
+  if (total >= 3) throw new AppError(409,"Document already has 3 phones");
+
+  return phonesRepo.insertPhone({ number, name, description, carrier_id, customer_id: customer.id });
 }
 
 export async function listPhonesByDocument(document: string) {
-  return listPhonesByCustomerDocument(document);
+  return phonesRepo.listByDocument(document);
 }

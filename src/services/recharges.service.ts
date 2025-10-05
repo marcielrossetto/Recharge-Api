@@ -1,25 +1,16 @@
-import { getPhoneByNumber } from "../repositories/phones.repository";
-import { insertRecharge, listRechargesByNumber } from "../repositories/recharges.repository";
+import { AppError } from "../middlewares/error";
+import * as phonesRepo from "../repositories/phones.repository";
+import * as rechargesRepo from "../repositories/recharges.repository";
+import { Recharge } from "../protocols";
 
-
-export async function createRecharge(data: { phoneId: number; amount: number; }) {
-// phoneId deve existir; confirmamos tentando pelo id via number? Melhor: ver no banco via join
-// Aqui validaremos por existência indireta com uma consulta rápida:
-// Para manter simples, deixamos o insert confiar na FK e capturamos erro se necessário.
-if (data.amount < 10 || data.amount > 1000) {
-throw { type: "conflict", message: "amount must be between 10 and 1000" };
-}
-try {
-const created = await insertRecharge(data.phoneId, data.amount);
-return created;
-} catch (e: any) {
-// viola FK → phone inexistente
-throw { type: "not_found", message: "phone not found" };
-}
+export async function createRecharge(phone_id: number, value: number) {
+  const phone = await phonesRepo.findById(phone_id);
+  if (!phone) throw new AppError(404, "Phone not found");
+  return rechargesRepo.insertRecharge(phone_id, value);
 }
 
-
-export async function listRecharges(number: string) {
-// número precisa existir? Requisito diz: se não encontrar recarga, array vazio
-return listRechargesByNumber(number);
+export async function listByNumber(number: string): Promise<Recharge[]> {
+  const phone = await phonesRepo.findByNumber(number);
+  if (!phone) return [];
+  return rechargesRepo.listByPhoneId(phone.id);
 }
