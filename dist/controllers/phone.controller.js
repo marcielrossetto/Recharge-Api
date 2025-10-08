@@ -33,25 +33,10 @@ var __importStar = (this && this.__importStar) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.create = create;
-exports.listByDocument = listByDocument;
-const service = __importStar(require("../services/phones.service"));
-async function create(req, res, next) {
-    try {
-        const phone = await service.createPhone(req.body);
-        res.status(201).send(phone);
-    }
-    catch (err) {
-        next(err);
-    }
-}
-async function listByDocument(req, res, next) {
-    try {
-        const { document } = req.params;
-        const phones = await service.listPhonesByDocument(document); // <- aqui
-        res.send(phones);
-    }
-    catch (err) {
-        next(err);
-    }
+exports.postPhone = postPhone;
+const phonesService = __importStar(require("../services/phones.service"));
+async function postPhone(req, res) {
+    const data = req.body; // já validado e tipado
+    const created = await phonesService.createPhone(data);
+    return res.status(201).send(created);
 }

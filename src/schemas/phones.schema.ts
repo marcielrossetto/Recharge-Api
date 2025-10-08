@@ -1,10 +1,8 @@
-import Joi from "joi";
+import Joi, { ObjectSchema } from "joi";
+import { NewPhoneDTO } from "../protocols/phones";
 
-export const createPhoneSchema = Joi.object({
-  document: Joi.string().pattern(/^\d{11}$/).required(), // CPF
+export const newPhoneSchema: ObjectSchema<NewPhoneDTO> = Joi.object({
+  customerId: Joi.number().integer().positive().required(),
   number: Joi.string().pattern(/^\d{10,11}$/).required(),
-  carrier_id: Joi.number().integer().required(),
-  // opcionais (ignorados no insert pois sua tabela não tem essas colunas)
-  name: Joi.string().optional(),
-  description: Joi.string().optional()
+  carrierId: Joi.number().integer().positive().required()
 });

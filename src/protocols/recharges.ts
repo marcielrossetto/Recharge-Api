@@ -10,3 +10,8 @@ phone_id: number;
 amount: string; // vindo do PG como string
 created_at: string;
 };
+
+export type NewRechargeDTO = {
+  phoneId: number;
+  amount: number;     // ex.: 10, 15, 20...
+};

@@ -16,3 +16,9 @@ carrier_id: number;
 customer_id: number;
 created_at: string;
 };
+
+export type NewPhoneDTO = {
+  customerId: number;
+  number: string;     // 10–11 dígitos
+  carrierId: number;
+};

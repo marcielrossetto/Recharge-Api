@@ -1,27 +1,20 @@
-import { AppError } from "../middlewares/error";
-import * as carriersRepo from "../repositories/carriers.repository";
-import * as customersRepo from "../repositories/customers.repository";
 import * as phonesRepo from "../repositories/phones.repository";
+import * as carriersRepo from "../repositories/carriers.repository";
+import { NewPhoneDTO, Phone } from "../protocols/phones";
 
-type CreatePhoneInput = {
-  document: string; number: string; name: string; description: string; carrier_id: number;
-};
+export async function createPhone(data: NewPhoneDTO): Promise<Phone> {
+  // limite de 3 por cliente
+  const total = await phonesRepo.countPhonesByCustomer(data.customerId);
+  if (total >= 3) throw { status: 409, message: "Customer already has 3 phones" };
 
-export async function createPhone(data: CreatePhoneInput) {
-  const { document, number, carrier_id, name, description } = data;
+  // carrier válido
+  const carrier = await carriersRepo.findById(data.carrierId);
+  if (!carrier) throw { status: 422, message: "Invalid carrier_id" };
 
-  if (await phonesRepo.findByNumber(number)) throw new AppError(409,"Phone number already exists");
-  if (!(await carriersRepo.findCarrierById(carrier_id))) throw new AppError(422,"Invalid carrier_id");
+  // número único (se aplicável)
+  const exists = await phonesRepo.findByNumber(data.number);
+  if (exists) throw { status: 409, message: "Phone number already registered" };
 
-  let customer = await customersRepo.findByDocument(document);
-  if (!customer) customer = await customersRepo.insertCustomer(document, name);
-
-  const total = await phonesRepo.countByDocument(document);
-  if (total >= 3) throw new AppError(409,"Document already has 3 phones");
-
-  return phonesRepo.insertPhone({ number, name, description, carrier_id, customer_id: customer.id });
-}
-
-export async function listPhonesByDocument(document: string) {
-  return phonesRepo.listByDocument(document);
+  // cria
+  return phonesRepo.insertPhone(data);
 }

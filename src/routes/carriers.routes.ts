@@ -1,6 +1,9 @@
 import { Router } from "express";
-import { listCarriers } from "../controllers/carriers.controller";
+import { getCarriers, getCarrierById, postCarrier } from "../controllers/carriers.controller";
 
 const router = Router();
-router.get("/", listCarriers); // GET /carriers
+router.get("/carriers", getCarriers);
+router.get("/carriers/:id", getCarrierById);
+router.post("/carriers", postCarrier); // opcional, se precisar criar
+
 export default router;

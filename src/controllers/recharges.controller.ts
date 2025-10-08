@@ -1,18 +1,9 @@
-import { Request, Response, NextFunction } from "express";
-import * as service from "../services/recharges.service";
+import { Request, Response } from "express";
+import { NewRechargeDTO } from "../protocols/recharges";
+import * as rechargesService from "../services/recharges.service";
 
-export async function create(req: Request, res: Response, next: NextFunction) {
-  try {
-    const { phone_id, value } = req.body;
-    const recharge = await service.createRecharge(phone_id, value);
-    res.status(201).send(recharge);
-  } catch (err) { next(err); }
-}
-
-export async function listByNumber(req: Request, res: Response, next: NextFunction) {
-  try {
-    const { number } = req.params;
-    const rows = await service.listByNumber(number);
-    res.send(rows);
-  } catch (err) { next(err); }
+export async function createRecharge(req: Request, res: Response) {
+  const data = req.body as NewRechargeDTO;
+  const created = await rechargesService.createRecharge(data);
+  return res.status(201).send(created);
 }

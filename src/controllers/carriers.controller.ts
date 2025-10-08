@@ -1,13 +1,19 @@
-import { Request, Response, NextFunction } from "express";
-import { db } from "../database/pg";
+import { Request, Response } from "express";
+import * as service from "../services/carriers.service";
 
-export async function listCarriers(_req: Request, res: Response, next: NextFunction) {
-  try {
-    const { rows } = await db.query(
-      "SELECT id, name, code FROM carriers ORDER BY name"
-    );
-    res.json(rows);
-  } catch (err) {
-    next(err);
-  }
+export async function getCarriers(_req: Request, res: Response) {
+  const data = await service.listCarriers();
+  res.send(data);
+}
+
+export async function getCarrierById(req: Request, res: Response) {
+  const id = Number(req.params.id);
+  const data = await service.getCarrier(id);
+  res.send(data);
+}
+
+export async function postCarrier(req: Request, res: Response) {
+  const { name, code }:{ name:string; code:number } = req.body;
+  const created = await service.createCarrier(name, code);
+  res.status(201).send(created);
 }

@@ -33,21 +33,23 @@ var __importStar = (this && this.__importStar) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getCarriers = getCarriers;
-exports.getCarrierById = getCarrierById;
-exports.postCarrier = postCarrier;
-const service = __importStar(require("../services/carriers.service"));
-async function getCarriers(_req, res) {
-    const data = await service.listCarriers();
-    res.send(data);
+exports.listCarriers = listCarriers;
+exports.getCarrier = getCarrier;
+exports.createCarrier = createCarrier;
+const repo = __importStar(require("../repositories/carriers.repository"));
+function listCarriers() {
+    return repo.findAll();
 }
-async function getCarrierById(req, res) {
-    const id = Number(req.params.id);
-    const data = await service.getCarrier(id);
-    res.send(data);
+async function getCarrier(id) {
+    const carrier = await repo.findById(id);
+    if (!carrier)
+        throw { status: 404, message: "Carrier not found" };
+    return carrier;
 }
-async function postCarrier(req, res) {
-    const { name, code } = req.body;
-    const created = await service.createCarrier(name, code);
-    res.status(201).send(created);
+async function createCarrier(name, code) {
+    // exemplo: impedir duplicado por nome
+    const all = await repo.findAll();
+    if (all.some(c => c.name.toLowerCase() === name.toLowerCase()))
+        throw { status: 409, message: "Carrier already exists" };
+    return repo.insert(name, code);
 }

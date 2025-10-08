@@ -1,15 +1,14 @@
-import { Request, Response, NextFunction } from "express";
-import Joi from "joi";
+import { NextFunction, Request, Response } from "express";
+import { ObjectSchema } from "joi";
 
-export function validateSchema(schema: Joi.ObjectSchema) {
-  return (req: Request, res: Response, next: NextFunction) => {
-    const { error } = schema.validate(req.body, { abortEarly: false });
-    if (error) {
-      return res.status(422).send({
-        message: "Validation failed",
-        details: error.details.map(d => d.message),
-      });
-    }
+export function validateSchema<T>(schema: ObjectSchema<T>) {
+  return (req: Request, _res: Response, next: NextFunction) => {
+    const { error, value } = schema.validate(req.body, {
+      abortEarly: false,
+      stripUnknown: true
+    });
+    if (error) return next({ status: 422, message: "Validation error", details: error.details });
+    req.body = value as T; // body do req agora está tipado
     next();
   };
 }
