@@ -1,24 +1,19 @@
-import "dotenv/config";
+// src/server.ts
 import express from "express";
-import routes from "./routes";
-import { errorHandler } from "./middlewares/errorHandler";
-const app = express();
+import carriersRoutes from "./routes/carriers.routes";
 
+const app = express();
 app.use(express.json());
 
-// healthcheck
-app.get("/health", (_req, res) => res.send("ok"));
+// health opcional
+app.get("/health", (_req, res) => res.json({ status: "ok" }));
 
-// rotas
-app.use("/", routes);
+// se NÃO usa prefixo:
+app.use("/carriers", carriersRoutes);
 
-// 404 opcional
-app.use((_req, res) => res.status(404).send({ error: "Not Found" }));
+// se usa prefixo /api, troque a linha acima por:
+// app.use("/api/carriers", carriersRoutes);
 
-// SEMPRE por último: handler de erros
-app.use(errorHandler);
-
-const PORT = Number(process.env.PORT) || 4000;
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
-
-export default app;
+// 404 e erro (depois das rotas)
+app.use((_req, res) => res.status(404).json({ error: "Not Found" }));
+app.listen(4000, () => console.log("Server running on port 4000"));

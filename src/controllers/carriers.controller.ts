@@ -1,19 +1,27 @@
-import { Request, Response } from "express";
-import * as service from "../services/carriers.service";
+import { Request, Response, NextFunction } from "express";
+import * as repo from "../repositories/carriers.repository";
+import { createCarrier } from "../services/carriers.service";
 
-export async function getCarriers(_req: Request, res: Response) {
-  const data = await service.listCarriers();
-  res.send(data);
+export async function listCarriers(req: Request, res: Response, next: NextFunction) {
+  try {
+    const rows = await repo.findAll();
+    res.json(rows);
+  } catch (err) { next(err); }
 }
 
-export async function getCarrierById(req: Request, res: Response) {
-  const id = Number(req.params.id);
-  const data = await service.getCarrier(id);
-  res.send(data);
+export async function getCarrierById(req: Request, res: Response, next: NextFunction) {
+  try {
+    const id = Number(req.params.id);
+    const row = await repo.findById(id);
+    if (!row) return res.status(404).json({ message: "Carrier not found" });
+    res.json(row);
+  } catch (err) { next(err); }
 }
 
-export async function postCarrier(req: Request, res: Response) {
-  const { name, code }:{ name:string; code:number } = req.body;
-  const created = await service.createCarrier(name, code);
-  res.status(201).send(created);
+export async function createCarrierCtrl(req: Request, res: Response, next: NextFunction) {
+  try {
+    const { name, code } = req.body as { name: string; code: string };
+    const created = await createCarrier(name, code);
+    res.status(201).json(created);
+  } catch (err) { next(err); }
 }

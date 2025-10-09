@@ -1,9 +1,11 @@
 import { Router } from "express";
-import { getCarriers, getCarrierById, postCarrier } from "../controllers/carriers.controller";
+import { listCarriers, getCarrierById, createCarrierCtrl } from "../controllers/carriers.controller";
+// se tiver middleware de validação, importe e coloque entre a rota e o controller
 
 const router = Router();
-router.get("/carriers", getCarriers);
-router.get("/carriers/:id", getCarrierById);
-router.post("/carriers", postCarrier); // opcional, se precisar criar
+
+router.get("/", listCarriers);
+router.get("/:id", getCarrierById);
+router.post("/", createCarrierCtrl);
 
 export default router;

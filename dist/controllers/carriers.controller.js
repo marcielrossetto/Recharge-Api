@@ -33,21 +33,39 @@ var __importStar = (this && this.__importStar) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getCarriers = getCarriers;
+exports.listCarriers = listCarriers;
 exports.getCarrierById = getCarrierById;
-exports.postCarrier = postCarrier;
-const service = __importStar(require("../services/carriers.service"));
-async function getCarriers(_req, res) {
-    const data = await service.listCarriers();
-    res.send(data);
+exports.createCarrierCtrl = createCarrierCtrl;
+const repo = __importStar(require("../repositories/carriers.repository"));
+const carriers_service_1 = require("../services/carriers.service");
+async function listCarriers(req, res, next) {
+    try {
+        const rows = await repo.findAll();
+        res.json(rows);
+    }
+    catch (err) {
+        next(err);
+    }
 }
-async function getCarrierById(req, res) {
-    const id = Number(req.params.id);
-    const data = await service.getCarrier(id);
-    res.send(data);
+async function getCarrierById(req, res, next) {
+    try {
+        const id = Number(req.params.id);
+        const row = await repo.findById(id);
+        if (!row)
+            return res.status(404).json({ message: "Carrier not found" });
+        res.json(row);
+    }
+    catch (err) {
+        next(err);
+    }
 }
-async function postCarrier(req, res) {
-    const { name, code } = req.body;
-    const created = await service.createCarrier(name, code);
-    res.status(201).send(created);
+async function createCarrierCtrl(req, res, next) {
+    try {
+        const { name, code } = req.body;
+        const created = await (0, carriers_service_1.createCarrier)(name, code);
+        res.status(201).json(created);
+    }
+    catch (err) {
+        next(err);
+    }
 }

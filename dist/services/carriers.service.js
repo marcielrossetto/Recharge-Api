@@ -33,23 +33,12 @@ var __importStar = (this && this.__importStar) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.listCarriers = listCarriers;
-exports.getCarrier = getCarrier;
 exports.createCarrier = createCarrier;
 const repo = __importStar(require("../repositories/carriers.repository"));
-function listCarriers() {
-    return repo.findAll();
-}
-async function getCarrier(id) {
-    const carrier = await repo.findById(id);
-    if (!carrier)
-        throw { status: 404, message: "Carrier not found" };
-    return carrier;
-}
 async function createCarrier(name, code) {
-    // exemplo: impedir duplicado por nome
-    const all = await repo.findAll();
-    if (all.some(c => c.name.toLowerCase() === name.toLowerCase()))
-        throw { status: 409, message: "Carrier already exists" };
-    return repo.insert(name, code);
+    // (opcional) validações
+    const exists = await repo.findByCode(code);
+    if (exists)
+        throw new Error("Carrier code already exists");
+    return repo.create({ name, code });
 }
