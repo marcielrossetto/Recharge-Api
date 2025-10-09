@@ -33,24 +33,18 @@ var __importStar = (this && this.__importStar) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.create = create;
-exports.listByNumber = listByNumber;
-const service = __importStar(require("../services/recharges.service"));
-async function create(req, res, next) {
+exports.createRecharge = createRecharge;
+const rechargesService = __importStar(require("../services/recharges.service"));
+async function createRecharge(req, res, next) {
     try {
-        const { phone_id, value } = req.body;
-        const recharge = await service.createRecharge(phone_id, value);
-        res.status(201).send(recharge);
-    }
-    catch (err) {
-        next(err);
-    }
-}
-async function listByNumber(req, res, next) {
-    try {
-        const { number } = req.params;
-        const rows = await service.listByNumber(number);
-        res.send(rows);
+        const b = req.body;
+        const data = {
+            phone_id: b.phone_id ?? b.phoneId,
+            value: b.value ?? b.amount,
+            status: b.status,
+        };
+        const created = await rechargesService.createRecharge(data);
+        res.status(201).json(created);
     }
     catch (err) {
         next(err);

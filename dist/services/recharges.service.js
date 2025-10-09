@@ -34,19 +34,9 @@ var __importStar = (this && this.__importStar) || (function () {
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.createRecharge = createRecharge;
-exports.listByNumber = listByNumber;
-const error_1 = require("../middlewares/error");
-const phonesRepo = __importStar(require("../repositories/phones.repository"));
+// src/services/recharges.service.ts
 const rechargesRepo = __importStar(require("../repositories/recharges.repository"));
-async function createRecharge(phone_id, value) {
-    const phone = await phonesRepo.findById(phone_id);
-    if (!phone)
-        throw new error_1.AppError(404, "Phone not found");
-    return rechargesRepo.insertRecharge(phone_id, value);
-}
-async function listByNumber(number) {
-    const phone = await phonesRepo.findByNumber(number);
-    if (!phone)
-        return [];
-    return rechargesRepo.listByPhoneId(phone.id);
+async function createRecharge(data) {
+    // valide phone_id, value, etc. aqui se quiser
+    return rechargesRepo.insertRecharge(data.phone_id, data.value);
 }

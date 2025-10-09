@@ -1,48 +1,39 @@
-import { query } from "../db/pg";
+// src/repositories/phones.repository.ts
+import { pool } from "../config/pg";
+import { NewPhoneDTO, Phone } from "../protocols/phones";
 
-export async function countByDocument(document: string) {
-  const { rows } = await query<{ count: string }>(`
-    SELECT COUNT(p.*)::text AS count
-      FROM phones p
-      JOIN customers c ON c.id = p.customer_id
-     WHERE c.document = $1
-  `,[document]);
-  return Number(rows[0]?.count ?? 0);
+export async function countPhonesByCustomer(customerId: number): Promise<number> {
+  const { rows } = await pool.query<{ count: number }>(
+    `SELECT COUNT(*)::int AS count FROM phones WHERE customer_id = $1`,
+    [customerId]
+  );
+  return rows[0]?.count ?? 0;
 }
 
-export async function findByNumber(number: string) {
-  const { rows } = await query<any>("SELECT * FROM phones WHERE number=$1",[number]);
-  return rows[0] ?? null;
-}
-
-export async function findById(id: number) {
-  const { rows } = await query<any>("SELECT * FROM phones WHERE id=$1",[id]);
-  return rows[0] ?? null;
-}
-
-export async function insertPhone(data: {
-  number: string; name: string; description: string;
-  carrier_id: number; customer_id: number; active?: boolean;
-}) {
-  const { number, name, description, carrier_id, customer_id, active = true } = data;
-  const { rows } = await query<any>(`
-    INSERT INTO phones (number, name, description, carrier_id, customer_id, active)
-    VALUES ($1,$2,$3,$4,$5,$6)
-    RETURNING *
-  `,[number, name, description, carrier_id, customer_id, active]);
+export async function insertPhone(data: NewPhoneDTO): Promise<Phone> {
+  const { number, name, description, carrierId, customerId, active = true } = data;
+  const { rows } = await pool.query<Phone>(
+    `INSERT INTO phones (number, name, description, carrier_id, customer_id, active)
+     VALUES ($1,$2,$3,$4,$5,$6)
+     RETURNING id, number, name, description,
+               carrier_id AS "carrierId",
+               customer_id AS "customerId",
+               active`,
+    [number, name, description, carrierId, customerId, active]
+  );
   return rows[0];
 }
 
-export async function listByDocument(document: string) {
-  const { rows } = await query<any>(`
-    SELECT
-      p.id, p.number, p.name, p.description, p.active, p.created_at,
-      json_build_object('id', ca.id, 'name', ca.name, 'code', ca.code) AS carrier
-    FROM phones p
-    JOIN customers cu ON cu.id = p.customer_id
-    JOIN carriers  ca ON ca.id = p.carrier_id
-    WHERE cu.document = $1
-    ORDER BY p.created_at DESC
-  `,[document]);
+export async function listByDocument(document: string): Promise<Phone[]> {
+  const { rows } = await pool.query<Phone>(
+    `SELECT p.id, p.number, p.name, p.description,
+            p.carrier_id AS "carrierId",
+            p.customer_id AS "customerId",
+            p.active
+     FROM phones p
+     JOIN customers c ON c.id = p.customer_id
+     WHERE c.document = $1`,
+    [document]
+  );
   return rows;
 }

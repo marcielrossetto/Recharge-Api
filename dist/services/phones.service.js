@@ -34,25 +34,15 @@ var __importStar = (this && this.__importStar) || (function () {
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.createPhone = createPhone;
-exports.listPhonesByDocument = listPhonesByDocument;
-const error_1 = require("../middlewares/error");
-const carriersRepo = __importStar(require("../repositories/carriers.repository"));
-const customersRepo = __importStar(require("../repositories/customers.repository"));
+// src/services/phones.service.ts
 const phonesRepo = __importStar(require("../repositories/phones.repository"));
+const carriersRepo = __importStar(require("../repositories/carriers.repository"));
 async function createPhone(data) {
-    const { document, number, carrier_id, name, description } = data;
-    if (await phonesRepo.findByNumber(number))
-        throw new error_1.AppError(409, "Phone number already exists");
-    if (!(await carriersRepo.findCarrierById(carrier_id)))
-        throw new error_1.AppError(422, "Invalid carrier_id");
-    let customer = await customersRepo.findByDocument(document);
-    if (!customer)
-        customer = await customersRepo.insertCustomer(document, name);
-    const total = await phonesRepo.countByDocument(document);
+    const total = await phonesRepo.countPhonesByCustomer(data.customerId);
     if (total >= 3)
-        throw new error_1.AppError(409, "Document already has 3 phones");
-    return phonesRepo.insertPhone({ number, name, description, carrier_id, customer_id: customer.id });
-}
-async function listPhonesByDocument(document) {
-    return phonesRepo.listByDocument(document);
+        throw new Error("Customer already has 3 phones");
+    const carrier = await carriersRepo.findById(data.carrierId);
+    if (!carrier)
+        throw new Error("Carrier not found");
+    return phonesRepo.insertPhone(data);
 }

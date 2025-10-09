@@ -36,7 +36,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.postPhone = postPhone;
 const phonesService = __importStar(require("../services/phones.service"));
 async function postPhone(req, res) {
-    const data = req.body; // já validado e tipado
+    const data = req.body;
     const created = await phonesService.createPhone(data);
     return res.status(201).send(created);
 }
