@@ -1,9 +1,9 @@
 import { Router } from "express";
-import { postPhone, listPhones } from "../controllers/phones.controller";
+import { postPhone, getPhonesByDocument } from "../controllers/phones.controller";
 
-const phonesRouter = Router();
+const router = Router();
 
-phonesRouter.post("/", postPhone);
-phonesRouter.get("/", listPhones);
+router.post("/", postPhone);
+router.get("/document/:document", getPhonesByDocument);
 
-export default phonesRouter;
+export default router;

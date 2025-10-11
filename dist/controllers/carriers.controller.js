@@ -33,39 +33,22 @@ var __importStar = (this && this.__importStar) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.listCarriers = listCarriers;
-exports.getCarrierById = getCarrierById;
-exports.createCarrierCtrl = createCarrierCtrl;
-const repo = __importStar(require("../repositories/carriers.repository"));
-const carriers_service_1 = require("../services/carriers.service");
-async function listCarriers(req, res, next) {
-    try {
-        const rows = await repo.findAll();
-        res.json(rows);
-    }
-    catch (err) {
-        next(err);
-    }
+exports.getCarriers = getCarriers;
+exports.postCarrier = postCarrier;
+const service = __importStar(require("../services/carriers.service"));
+async function getCarriers(_req, res) {
+    const rows = await service.listAll();
+    return res.json(rows);
 }
-async function getCarrierById(req, res, next) {
-    try {
-        const id = Number(req.params.id);
-        const row = await repo.findById(id);
-        if (!row)
-            return res.status(404).json({ message: "Carrier not found" });
-        res.json(row);
-    }
-    catch (err) {
-        next(err);
-    }
-}
-async function createCarrierCtrl(req, res, next) {
+async function postCarrier(req, res) {
     try {
         const { name, code } = req.body;
-        const created = await (0, carriers_service_1.createCarrier)(name, code);
-        res.status(201).json(created);
+        if (!name || typeof code !== "number")
+            return res.status(422).json({ error: "name e code são obrigatórios" });
+        const created = await service.createCarrier(name, code);
+        return res.status(201).json(created);
     }
     catch (err) {
-        next(err);
+        return res.status(err?.status ?? 500).json({ error: err?.message ?? "Erro interno" });
     }
 }

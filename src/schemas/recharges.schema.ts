@@ -1,7 +1,7 @@
-import Joi, { ObjectSchema } from "joi";
-import { NewRechargeDTO } from "../protocols/recharges";
+import Joi from "joi";
 
-export const newRechargeSchema: ObjectSchema<NewRechargeDTO> = Joi.object({
-  phoneId: Joi.number().integer().positive().required(),
-  amount: Joi.number().valid(10, 15, 20, 25, 30, 35, 40, 50).required()
+export const createRechargeSchema = Joi.object({
+  phone_id: Joi.number().integer().positive().required(),
+  value: Joi.number().precision(2).min(10).max(1000).required(),
+  paid_with: Joi.string().valid("CREDIT_CARD", "PIX", "CASH").required()
 });

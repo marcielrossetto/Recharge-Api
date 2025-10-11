@@ -1,9 +1,9 @@
 import { Router } from "express";
 import { createRecharge, listRecharges } from "../controllers/recharges.controller";
 
-const rechargesRouter = Router();
+const router = Router();
 
-rechargesRouter.post("/", createRecharge);
-rechargesRouter.get("/", listRecharges);
+router.post("/", createRecharge);     // POST /recharges
+router.get("/", listRecharges);       // GET /recharges
 
-export default rechargesRouter;
+export default router;

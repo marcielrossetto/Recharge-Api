@@ -1,27 +1,20 @@
-import { Request, Response, NextFunction } from "express";
-import * as repo from "../repositories/carriers.repository";
-import { createCarrier } from "../services/carriers.service";
+import { Request, Response } from "express";
+import * as service from "../services/carriers.service";
 
-export async function listCarriers(req: Request, res: Response, next: NextFunction) {
-  try {
-    const rows = await repo.findAll();
-    res.json(rows);
-  } catch (err) { next(err); }
+export async function getCarriers(_req: Request, res: Response) {
+  const rows = await service.listAll();
+  return res.json(rows);
 }
 
-export async function getCarrierById(req: Request, res: Response, next: NextFunction) {
+export async function postCarrier(req: Request, res: Response) {
   try {
-    const id = Number(req.params.id);
-    const row = await repo.findById(id);
-    if (!row) return res.status(404).json({ message: "Carrier not found" });
-    res.json(row);
-  } catch (err) { next(err); }
-}
+    const { name, code } = req.body;
+    if (!name || typeof code !== "number")
+      return res.status(422).json({ error: "name e code são obrigatórios" });
 
-export async function createCarrierCtrl(req: Request, res: Response, next: NextFunction) {
-  try {
-    const { name, code } = req.body as { name: string; code: string };
-    const created = await createCarrier(name, code);
-    res.status(201).json(created);
-  } catch (err) { next(err); }
+    const created = await service.createCarrier(name, code);
+    return res.status(201).json(created);
+  } catch (err: any) {
+    return res.status(err?.status ?? 500).json({ error: err?.message ?? "Erro interno" });
+  }
 }

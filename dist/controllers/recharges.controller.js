@@ -34,19 +34,24 @@ var __importStar = (this && this.__importStar) || (function () {
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.createRecharge = createRecharge;
-const rechargesService = __importStar(require("../services/recharges.service"));
-async function createRecharge(req, res, next) {
+exports.listRecharges = listRecharges;
+const service = __importStar(require("../services/recharges.service"));
+async function createRecharge(req, res) {
     try {
-        const b = req.body;
-        const data = {
-            phone_id: b.phone_id ?? b.phoneId,
-            value: b.value ?? b.amount,
-            status: b.status,
-        };
-        const created = await rechargesService.createRecharge(data);
-        res.status(201).json(created);
+        const created = await service.createRecharge(req.body);
+        return res.status(201).json(created);
     }
     catch (err) {
-        next(err);
+        return res.status(err?.status ?? 500).json({ error: err?.message ?? "Erro interno" });
+    }
+}
+async function listRecharges(_req, res) {
+    try {
+        const list = await service.listRecharges();
+        return res.status(200).json(list);
+    }
+    catch (e) {
+        console.error("GET /recharges error:", e); // <— ajuda a ver a causa real
+        return res.status(500).json({ error: "Erro ao listar recargas" });
     }
 }

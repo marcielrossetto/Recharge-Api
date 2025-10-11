@@ -33,12 +33,18 @@ var __importStar = (this && this.__importStar) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.listAll = listAll;
 exports.createCarrier = createCarrier;
 const repo = __importStar(require("../repositories/carriers.repository"));
+async function listAll() {
+    return repo.findAll();
+}
 async function createCarrier(name, code) {
-    // (opcional) validações
     const exists = await repo.findByCode(code);
     if (exists)
-        throw new Error("Carrier code already exists");
+        throw { status: 409, message: "Código já cadastrado" };
+    const byName = await repo.findByName(name);
+    if (byName)
+        throw { status: 409, message: "Nome já cadastrado" };
     return repo.create({ name, code });
 }

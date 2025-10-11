@@ -1,14 +1,17 @@
-// src/services/phones.service.ts
-import * as phonesRepo from "../repositories/phones.repository";
-import * as carriersRepo from "../repositories/carriers.repository";
-import { NewPhoneDTO } from "../protocols/phones";
+import * as repo from "../repositories/phones.repository";
 
-export async function createPhone(data: NewPhoneDTO) {
-  const total = await phonesRepo.countPhonesByCustomer(data.customerId);
-  if (total >= 3) throw new Error("Customer already has 3 phones");
+export async function createPhone(data: repo.CreatePhoneInput) {
+  const { document, number } = data;
 
-  const carrier = await carriersRepo.findById(data.carrierId);
-  if (!carrier) throw new Error("Carrier not found");
+  const existing = await repo.findByNumber(number);
+  if (existing) throw { status: 409, message: "Número já cadastrado" };
 
-  return phonesRepo.insertPhone(data);
+  const count = await repo.countByDocument(document);
+  if (count >= 3) throw { status: 403, message: "Limite de 3 números por CPF" };
+
+  return repo.insertPhone(data);
+}
+
+export async function listByDocument(document: string) {
+  return repo.listByDocument(document);
 }

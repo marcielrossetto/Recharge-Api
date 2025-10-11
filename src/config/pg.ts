@@ -1,12 +1,13 @@
-import dotenv from "dotenv";
 import { Pool } from "pg";
-dotenv.config();
+import "dotenv/config";
 
-export const pool = new Pool({
-  host: process.env.PGHOST || "localhost",
-  port: Number(process.env.PGPORT || 5432),
-  user: process.env.PGUSER || "postgres",   // <— defina aqui
-  password: process.env.PGPASSWORD || "",   // <— e aqui
-  database: process.env.PGDATABASE || "recharge",
-  ssl: process.env.PGSSL === "true" ? { rejectUnauthorized: false } : undefined,
+const pool = new Pool({
+  connectionString: process.env.DATABASE_URL,
+  // Se precisar no Render/Heroku: ssl: { rejectUnauthorized: false },
 });
+
+export const db = {
+  query: (text: string, params?: any[]) => pool.query(text, params),
+};
+
+export default db;

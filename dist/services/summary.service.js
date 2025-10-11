@@ -33,14 +33,28 @@ var __importStar = (this && this.__importStar) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getByDocument = getByDocument;
+exports.getSummaryByDocument = getSummaryByDocument;
 const phonesRepo = __importStar(require("../repositories/phones.repository"));
 const rechargesRepo = __importStar(require("../repositories/recharges.repository"));
-async function getByDocument(document) {
+async function getSummaryByDocument(document) {
     const phones = await phonesRepo.listByDocument(document);
-    const enriched = await Promise.all(phones.map(async (p) => {
-        const recharges = await rechargesRepo.listByPhoneId(p.id);
-        return { ...p, recharges };
-    }));
-    return { document, phones: enriched };
+    const phoneIds = phones.map(p => p.id);
+    const recharges = await rechargesRepo.listByPhoneIds(phoneIds);
+    const byPhone = new Map();
+    for (const r of recharges) {
+        if (!byPhone.has(r.phone_id))
+            byPhone.set(r.phone_id, []);
+        byPhone.get(r.phone_id).push(r);
+    }
+    return {
+        document,
+        phones: phones.map(p => ({
+            id: p.id,
+            number: p.number,
+            name: p.name,
+            description: p.description,
+            carrier: { id: p.carrier_id, name: p.carrier_name, code: p.carrier_code },
+            recharges: byPhone.get(p.id) ?? []
+        }))
+    };
 }

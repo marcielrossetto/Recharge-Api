@@ -34,9 +34,20 @@ var __importStar = (this && this.__importStar) || (function () {
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.createRecharge = createRecharge;
-// src/services/recharges.service.ts
-const rechargesRepo = __importStar(require("../repositories/recharges.repository"));
+exports.listRecharges = listRecharges;
+const repo = __importStar(require("../repositories/recharges.repository"));
+const phonesRepo = __importStar(require("../repositories/phones.repository"));
 async function createRecharge(data) {
-    // valide phone_id, value, etc. aqui se quiser
-    return rechargesRepo.insertRecharge(data.phone_id, data.value);
+    const { phone_id, amount } = data;
+    if (!phone_id || !amount)
+        throw { status: 422, message: "Campos obrigatórios" };
+    if (amount <= 0)
+        throw { status: 422, message: "Valor inválido" };
+    const phone = await phonesRepo.findById(phone_id);
+    if (!phone)
+        throw { status: 404, message: "Telefone não encontrado" };
+    return repo.insertRecharge({ phone_id, amount });
+}
+async function listRecharges() {
+    return repo.listAll();
 }

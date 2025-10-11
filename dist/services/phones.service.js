@@ -34,15 +34,18 @@ var __importStar = (this && this.__importStar) || (function () {
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.createPhone = createPhone;
-// src/services/phones.service.ts
-const phonesRepo = __importStar(require("../repositories/phones.repository"));
-const carriersRepo = __importStar(require("../repositories/carriers.repository"));
+exports.listByDocument = listByDocument;
+const repo = __importStar(require("../repositories/phones.repository"));
 async function createPhone(data) {
-    const total = await phonesRepo.countPhonesByCustomer(data.customerId);
-    if (total >= 3)
-        throw new Error("Customer already has 3 phones");
-    const carrier = await carriersRepo.findById(data.carrierId);
-    if (!carrier)
-        throw new Error("Carrier not found");
-    return phonesRepo.insertPhone(data);
+    const { document, number } = data;
+    const existing = await repo.findByNumber(number);
+    if (existing)
+        throw { status: 409, message: "Número já cadastrado" };
+    const count = await repo.countByDocument(document);
+    if (count >= 3)
+        throw { status: 403, message: "Limite de 3 números por CPF" };
+    return repo.insertPhone(data);
+}
+async function listByDocument(document) {
+    return repo.listByDocument(document);
 }
