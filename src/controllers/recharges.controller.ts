@@ -1,28 +1,11 @@
-import { Request, Response, NextFunction } from "express";
-import * as rechargesService from "../services/recharges.service";
-import { NewRechargeDTO } from "../protocols/recharges";
+import { Request, Response } from "express";
 
-type CreateRechargeBody =
-  | { phone_id: number; value: number; status?: NewRechargeDTO["status"] }
-  | { phoneId: number; value: number; status?: NewRechargeDTO["status"] }
-  | { phone_id: number; amount: number; status?: NewRechargeDTO["status"] }
-  | { phoneId: number; amount: number; status?: NewRechargeDTO["status"] };
+export async function createRecharge(req: Request, res: Response) {
+  // TODO: validar, checar phone_id e salvar no DB
+  return res.status(201).send({ ok: true });
+}
 
-export async function createRecharge(
-  req: Request<unknown, unknown, CreateRechargeBody>,
-  res: Response,
-  next: NextFunction
-) {
-  try {
-    const b = req.body as any;
-    const data: NewRechargeDTO = {
-      phone_id: b.phone_id ?? b.phoneId,
-      value: b.value ?? b.amount,
-      status: b.status,
-    };
-    const created = await rechargesService.createRecharge(data);
-    res.status(201).json(created);
-  } catch (err) {
-    next(err);
-  }
+export async function listRecharges(req: Request, res: Response) {
+  // TODO: se houver query ?phone_id= filtrar no DB
+  return res.status(200).send([]); // por enquanto
 }

@@ -1,10 +1,6 @@
-import { Request, Response, NextFunction } from "express";
-import * as service from "../services/summary.service";
+import { Request, Response } from "express";
 
-export async function getSummary(req: Request, res: Response, next: NextFunction) {
-  try {
-    const { document } = req.params;
-    const data = await service.getByDocument(document);
-    res.send(data);
-  } catch (err) { next(err); }
+export async function getSummary(_req: Request, res: Response) {
+  // TODO: agregar por carrier no DB
+  return res.status(200).send([]); // por enquanto
 }

@@ -1,9 +1,9 @@
 import { Router } from "express";
-import { createRecharge } from "../controllers/recharges.controller";
-import { validateSchema } from "../middlewares/validateSchema";
-import { newRechargeSchema } from "../schemas/recharges.schema";
-import { NewRechargeDTO } from "../protocols/recharges";
+import { createRecharge, listRecharges } from "../controllers/recharges.controller";
 
-const router = Router();
-router.post("/recharges", validateSchema<NewRechargeDTO>(newRechargeSchema), createRecharge);
-export default router;
+const rechargesRouter = Router();
+
+rechargesRouter.post("/", createRecharge);
+rechargesRouter.get("/", listRecharges);
+
+export default rechargesRouter;
