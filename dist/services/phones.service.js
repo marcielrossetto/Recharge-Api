@@ -35,17 +35,28 @@ var __importStar = (this && this.__importStar) || (function () {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.createPhone = createPhone;
 exports.listByDocument = listByDocument;
-const repo = __importStar(require("../repositories/phones.repository"));
+exports.listAll = listAll;
+const phonesRepo = __importStar(require("../repositories/phones.repository"));
+const carriersRepo = __importStar(require("../repositories/carriers.repository"));
+const errorHandler_1 = require("../middlewares/errorHandler");
 async function createPhone(data) {
-    const { document, number } = data;
-    const existing = await repo.findByNumber(number);
-    if (existing)
-        throw { status: 409, message: "Número já cadastrado" };
-    const count = await repo.countByDocument(document);
-    if (count >= 3)
-        throw { status: 403, message: "Limite de 3 números por CPF" };
-    return repo.insertPhone(data);
+    // valida carrier
+    const carrier = await carriersRepo.findById(data.carrier_id);
+    if (!carrier)
+        throw (0, errorHandler_1.badRequest)("Invalid carrier_id");
+    // limite 3 por CPF
+    const total = await phonesRepo.countByDocument(data.document);
+    if (total >= 3)
+        throw (0, errorHandler_1.conflict)("This document already has 3 phones");
+    // número único
+    const exists = await phonesRepo.findByNumber(data.number);
+    if (exists)
+        throw (0, errorHandler_1.conflict)("Phone number already exists");
+    return phonesRepo.insert(data);
 }
 async function listByDocument(document) {
-    return repo.listByDocument(document);
+    return phonesRepo.findAllByDocument(document);
+}
+async function listAll() {
+    return phonesRepo.findAll();
 }

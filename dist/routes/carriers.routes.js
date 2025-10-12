@@ -2,7 +2,9 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = require("express");
 const carriers_controller_1 = require("../controllers/carriers.controller");
+const validate_1 = require("../middlewares/validate");
+const carriers_schemas_1 = require("../validations/carriers.schemas");
 const router = (0, express_1.Router)();
-router.get("/", carriers_controller_1.getCarriers); // GET /carriers
-router.post("/", carriers_controller_1.postCarrier); // POST /carriers
+router.get("/", carriers_controller_1.getCarriers);
+router.post("/", (0, validate_1.validate)(carriers_schemas_1.createCarrierSchema), carriers_controller_1.postCarrier);
 exports.default = router;

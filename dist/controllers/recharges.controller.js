@@ -33,25 +33,25 @@ var __importStar = (this && this.__importStar) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.createRecharge = createRecharge;
-exports.listRecharges = listRecharges;
-const service = __importStar(require("../services/recharges.service"));
-async function createRecharge(req, res) {
+exports.postRecharge = postRecharge;
+exports.getRechargesByNumber = getRechargesByNumber;
+const rechargesService = __importStar(require("../services/recharges.service"));
+async function postRecharge(req, res, next) {
     try {
-        const created = await service.createRecharge(req.body);
-        return res.status(201).json(created);
+        const created = await rechargesService.createRecharge(req.body);
+        res.status(201).send(created);
     }
     catch (err) {
-        return res.status(err?.status ?? 500).json({ error: err?.message ?? "Erro interno" });
+        next(err);
     }
 }
-async function listRecharges(_req, res) {
+async function getRechargesByNumber(req, res, next) {
     try {
-        const list = await service.listRecharges();
-        return res.status(200).json(list);
+        const { number } = req.params;
+        const list = await rechargesService.listByNumber(number);
+        res.send(list);
     }
-    catch (e) {
-        console.error("GET /recharges error:", e); // <— ajuda a ver a causa real
-        return res.status(500).json({ error: "Erro ao listar recargas" });
+    catch (err) {
+        next(err);
     }
 }

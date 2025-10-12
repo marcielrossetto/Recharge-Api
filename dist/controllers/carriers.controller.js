@@ -36,19 +36,23 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.getCarriers = getCarriers;
 exports.postCarrier = postCarrier;
 const service = __importStar(require("../services/carriers.service"));
-async function getCarriers(_req, res) {
-    const rows = await service.listAll();
-    return res.json(rows);
-}
-async function postCarrier(req, res) {
+async function getCarriers(_req, res, next) {
     try {
-        const { name, code } = req.body;
-        if (!name || typeof code !== "number")
-            return res.status(422).json({ error: "name e code são obrigatórios" });
-        const created = await service.createCarrier(name, code);
-        return res.status(201).json(created);
+        const rows = await service.listCarriers(); // <- era listAll
+        res.send(rows);
     }
     catch (err) {
-        return res.status(err?.status ?? 500).json({ error: err?.message ?? "Erro interno" });
+        next(err);
+    }
+}
+async function postCarrier(req, res, next) {
+    try {
+        const { name, code } = req.body;
+        // service.createCarrier recebe um objeto { name, code }
+        const created = await service.createCarrier({ name, code });
+        res.status(201).send(created);
+    }
+    catch (err) {
+        next(err);
     }
 }

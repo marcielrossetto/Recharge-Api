@@ -33,18 +33,23 @@ var __importStar = (this && this.__importStar) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.listAll = listAll;
+exports.listCarriers = listCarriers;
 exports.createCarrier = createCarrier;
 const repo = __importStar(require("../repositories/carriers.repository"));
-async function listAll() {
+const errorHandler_1 = require("../middlewares/errorHandler");
+async function listCarriers() {
     return repo.findAll();
 }
-async function createCarrier(name, code) {
-    const exists = await repo.findByCode(code);
-    if (exists)
-        throw { status: 409, message: "Código já cadastrado" };
+async function createCarrier({ name, code }) {
+    if (!name?.trim())
+        throw (0, errorHandler_1.badRequest)("name is required");
+    if (!Number.isInteger(code) || code <= 0)
+        throw (0, errorHandler_1.badRequest)("code must be a positive integer");
+    const byCode = await repo.findByCode(code);
+    if (byCode)
+        throw (0, errorHandler_1.conflict)("Carrier code already exists");
     const byName = await repo.findByName(name);
     if (byName)
-        throw { status: 409, message: "Nome já cadastrado" };
-    return repo.create({ name, code });
+        throw (0, errorHandler_1.conflict)("Carrier name already exists");
+    return repo.create({ name: name.trim(), code });
 }

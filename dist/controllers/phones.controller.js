@@ -35,25 +35,33 @@ var __importStar = (this && this.__importStar) || (function () {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.postPhone = postPhone;
 exports.getPhonesByDocument = getPhonesByDocument;
+exports.getAllPhones = getAllPhones;
 const phonesService = __importStar(require("../services/phones.service"));
-async function postPhone(req, res) {
+async function postPhone(req, res, next) {
     try {
         const created = await phonesService.createPhone(req.body);
-        return res.status(201).json(created);
+        res.status(201).send(created);
     }
     catch (err) {
-        return res.status(err?.status ?? 500).json({ error: err?.message ?? "Erro interno no servidor" });
+        next(err);
     }
 }
-async function getPhonesByDocument(req, res) {
+async function getPhonesByDocument(req, res, next) {
     try {
-        const document = (req.params.document || req.query.document);
-        if (!document)
-            return res.status(422).json({ error: "document é obrigatório" });
+        const { document } = req.params;
         const list = await phonesService.listByDocument(document);
-        return res.json(list);
+        res.send(list);
     }
-    catch {
-        return res.status(500).json({ error: "Erro interno no servidor" });
+    catch (err) {
+        next(err);
+    }
+}
+async function getAllPhones(req, res, next) {
+    try {
+        const list = await phonesService.listAll();
+        res.send(list);
+    }
+    catch (err) {
+        next(err);
     }
 }

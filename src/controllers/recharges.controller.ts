@@ -1,22 +1,21 @@
-import { Request, Response } from "express";
-import * as service from "../services/recharges.service";
+import { Request, Response, NextFunction } from "express";
+import * as rechargesService from "../services/recharges.service";
 
-export async function createRecharge(req: Request, res: Response) {
+export async function postRecharge(req: Request, res: Response, next: NextFunction) {
   try {
-    const created = await service.createRecharge(req.body);
-    return res.status(201).json(created);
-  } catch (err: any) {
-    return res.status(err?.status ?? 500).json({ error: err?.message ?? "Erro interno" });
+    const created = await rechargesService.createRecharge(req.body);
+    res.status(201).send(created);
+  } catch (err) { 
+    next(err); 
   }
 }
 
-export async function listRecharges(_req: Request, res: Response) {
+export async function getRechargesByNumber(req: Request, res: Response, next: NextFunction) {
   try {
-    const list = await service.listRecharges();
-    return res.status(200).json(list);
-  } catch (e: any) {
-    console.error("GET /recharges error:", e); // <— ajuda a ver a causa real
-    return res.status(500).json({ error: "Erro ao listar recargas" });
+    const { number } = req.params;
+    const list = await rechargesService.listByNumber(number);
+    res.send(list);
+  } catch (err) { 
+    next(err); 
   }
 }
-

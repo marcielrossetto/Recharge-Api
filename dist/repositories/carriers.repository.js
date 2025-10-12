@@ -1,23 +1,29 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.findAll = findAll;
-exports.findByName = findByName;
+exports.findById = findById;
 exports.findByCode = findByCode;
+exports.findByName = findByName;
 exports.create = create;
-const pg_1 = require("../config/pg");
+const db_1 = require("../config/db");
 async function findAll() {
-    const { rows } = await pg_1.db.query("SELECT id, name, code FROM carriers ORDER BY id ASC");
-    return rows;
+    return (0, db_1.query)("SELECT * FROM carriers ORDER BY name ASC");
 }
-async function findByName(name) {
-    const { rows } = await pg_1.db.query("SELECT id, name, code FROM carriers WHERE name = $1", [name]);
-    return rows[0];
+async function findById(id) {
+    const rows = await (0, db_1.query)("SELECT * FROM carriers WHERE id = $1", [id]);
+    return rows[0] ?? null;
 }
 async function findByCode(code) {
-    const { rows } = await pg_1.db.query("SELECT id, name, code FROM carriers WHERE code = $1", [code]);
-    return rows[0];
+    const rows = await (0, db_1.query)("SELECT * FROM carriers WHERE code = $1", [code]);
+    return rows[0] ?? null;
 }
-async function create({ name, code }) {
-    const { rows } = await pg_1.db.query(`INSERT INTO carriers (name, code) VALUES ($1, $2) RETURNING id, name, code`, [name, code]);
+async function findByName(name) {
+    const rows = await (0, db_1.query)("SELECT * FROM carriers WHERE name = $1", [name]);
+    return rows[0] ?? null;
+}
+async function create(data) {
+    const rows = await (0, db_1.query)(`INSERT INTO carriers (name, code)
+     VALUES ($1, $2)
+     RETURNING *`, [data.name, data.code]);
     return rows[0];
 }

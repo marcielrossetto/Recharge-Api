@@ -1,12 +1,12 @@
-import { ObjectSchema } from "joi";
 import { Request, Response, NextFunction } from "express";
+import { Schema } from "joi";
 
-export default function validateSchema(schema: ObjectSchema) {
+export function validate(schema: Schema) {
   return (req: Request, res: Response, next: NextFunction) => {
-    const { error, value } = schema.validate(req.body, { abortEarly: false, stripUnknown: true });
+    const { error, value } = schema.validate(req.body, { abortEarly: false });
     if (error) {
       return res.status(422).send({
-        error: "validation_error",
+        message: "Validation error",
         details: error.details.map(d => d.message)
       });
     }

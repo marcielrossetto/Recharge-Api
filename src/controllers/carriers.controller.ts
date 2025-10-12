@@ -1,20 +1,22 @@
-import { Request, Response } from "express";
+import { Request, Response, NextFunction } from "express";
 import * as service from "../services/carriers.service";
 
-export async function getCarriers(_req: Request, res: Response) {
-  const rows = await service.listAll();
-  return res.json(rows);
+export async function getCarriers(_req: Request, res: Response, next: NextFunction) {
+  try {
+    const rows = await service.listCarriers(); // <- era listAll
+    res.send(rows);
+  } catch (err) {
+    next(err);
+  }
 }
 
-export async function postCarrier(req: Request, res: Response) {
+export async function postCarrier(req: Request, res: Response, next: NextFunction) {
   try {
     const { name, code } = req.body;
-    if (!name || typeof code !== "number")
-      return res.status(422).json({ error: "name e code são obrigatórios" });
-
-    const created = await service.createCarrier(name, code);
-    return res.status(201).json(created);
-  } catch (err: any) {
-    return res.status(err?.status ?? 500).json({ error: err?.message ?? "Erro interno" });
+    // service.createCarrier recebe um objeto { name, code }
+    const created = await service.createCarrier({ name, code });
+    res.status(201).send(created);
+  } catch (err) {
+    next(err);
   }
 }

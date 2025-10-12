@@ -1,23 +1,25 @@
-import { Request, Response } from "express";
+import { Request, Response, NextFunction } from "express";
 import * as phonesService from "../services/phones.service";
 
-export async function postPhone(req: Request, res: Response) {
+export async function postPhone(req: Request, res: Response, next: NextFunction) {
   try {
     const created = await phonesService.createPhone(req.body);
-    return res.status(201).json(created);
-  } catch (err: any) {
-    return res.status(err?.status ?? 500).json({ error: err?.message ?? "Erro interno no servidor" });
-  }
+    res.status(201).send(created);
+  } catch (err) { next(err); }
 }
 
-export async function getPhonesByDocument(req: Request, res: Response) {
+export async function getPhonesByDocument(req: Request, res: Response, next: NextFunction) {
   try {
-    const document = (req.params.document || req.query.document) as string | undefined;
-    if (!document) return res.status(422).json({ error: "document é obrigatório" });
-
+    const { document } = req.params;
     const list = await phonesService.listByDocument(document);
-    return res.json(list);
-  } catch {
-    return res.status(500).json({ error: "Erro interno no servidor" });
+    res.send(list);
+  } catch (err) { next(err); }
+}
+export async function getAllPhones(req: Request, res: Response, next: NextFunction) {
+  try {
+    const list = await phonesService.listAll();
+    res.send(list);
+  } catch (err) { 
+    next(err); 
   }
 }

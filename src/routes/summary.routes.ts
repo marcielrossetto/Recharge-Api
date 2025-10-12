@@ -1,6 +1,6 @@
 import { Router } from "express";
-import { getSummaryByDocument } from "../controllers/summary.controller";
+import { getSummary } from "../controllers/summary.controller";
 
 const router = Router();
-router.get("/:document", getSummaryByDocument);
+router.get("/:document", getSummary);
 export default router;

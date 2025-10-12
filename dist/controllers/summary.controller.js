@@ -33,10 +33,15 @@ var __importStar = (this && this.__importStar) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getSummaryByDocument = getSummaryByDocument;
-const service = __importStar(require("../services/summary.service"));
-async function getSummaryByDocument(req, res) {
-    const { document } = req.params;
-    const data = await service.getSummaryByDocument(document);
-    return res.status(200).send(data);
+exports.getSummary = getSummary;
+const summaryService = __importStar(require("../services/summary.service"));
+async function getSummary(req, res, next) {
+    try {
+        const { document } = req.params;
+        const payload = await summaryService.getSummaryByDocument(document);
+        res.send(payload);
+    }
+    catch (err) {
+        next(err);
+    }
 }

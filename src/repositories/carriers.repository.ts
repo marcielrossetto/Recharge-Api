@@ -1,23 +1,31 @@
-import { db } from "../config/pg";
+import { query } from "../config/db";
+import { Carrier, CreateCarrierInput } from "../protocols/carrier";
 
-export type CarrierInput = { name: string; code: number };
+export async function findAll(): Promise<Carrier[]> {
+  return query<Carrier>("SELECT * FROM carriers ORDER BY name ASC");
+}
 
-export async function findAll() {
-  const { rows } = await db.query("SELECT id, name, code FROM carriers ORDER BY id ASC");
-  return rows;
+export async function findById(id: number): Promise<Carrier | null> {
+  const rows = await query<Carrier>("SELECT * FROM carriers WHERE id = $1", [id]);
+  return rows[0] ?? null;
 }
-export async function findByName(name: string) {
-  const { rows } = await db.query("SELECT id, name, code FROM carriers WHERE name = $1", [name]);
-  return rows[0];
+
+export async function findByCode(code: number): Promise<Carrier | null> {
+  const rows = await query<Carrier>("SELECT * FROM carriers WHERE code = $1", [code]);
+  return rows[0] ?? null;
 }
-export async function findByCode(code: number) {
-  const { rows } = await db.query("SELECT id, name, code FROM carriers WHERE code = $1", [code]);
-  return rows[0];
+
+export async function findByName(name: string): Promise<Carrier | null> {
+  const rows = await query<Carrier>("SELECT * FROM carriers WHERE name = $1", [name]);
+  return rows[0] ?? null;
 }
-export async function create({ name, code }: CarrierInput) {
-  const { rows } = await db.query(
-    `INSERT INTO carriers (name, code) VALUES ($1, $2) RETURNING id, name, code`,
-    [name, code]
+
+export async function create(data: CreateCarrierInput): Promise<Carrier> {
+  const rows = await query<Carrier>(
+    `INSERT INTO carriers (name, code)
+     VALUES ($1, $2)
+     RETURNING *`,
+    [data.name, data.code]
   );
   return rows[0];
 }

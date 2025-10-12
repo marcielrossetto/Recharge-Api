@@ -34,27 +34,34 @@ var __importStar = (this && this.__importStar) || (function () {
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.getSummaryByDocument = getSummaryByDocument;
-const phonesRepo = __importStar(require("../repositories/phones.repository"));
 const rechargesRepo = __importStar(require("../repositories/recharges.repository"));
+const db_1 = require("../config/db");
 async function getSummaryByDocument(document) {
-    const phones = await phonesRepo.listByDocument(document);
-    const phoneIds = phones.map(p => p.id);
-    const recharges = await rechargesRepo.listByPhoneIds(phoneIds);
-    const byPhone = new Map();
-    for (const r of recharges) {
-        if (!byPhone.has(r.phone_id))
-            byPhone.set(r.phone_id, []);
-        byPhone.get(r.phone_id).push(r);
-    }
-    return {
-        document,
-        phones: phones.map(p => ({
+    // phones do documento + carrier
+    const phones = await (0, db_1.query)(`SELECT p.*, c.id AS c_id, c.name AS c_name, c.code AS c_code
+       FROM phones p
+       JOIN carriers c ON c.id = p.carrier_id
+      WHERE p.document = $1
+      ORDER BY p.created_at DESC`, [document]);
+    const result = await Promise.all(phones.map(async (p) => {
+        const recharges = await rechargesRepo.listByPhoneId(p.id);
+        return {
             id: p.id,
+            document: p.document,
             number: p.number,
             name: p.name,
             description: p.description,
-            carrier: { id: p.carrier_id, name: p.carrier_name, code: p.carrier_code },
-            recharges: byPhone.get(p.id) ?? []
-        }))
+            created_at: p.created_at,
+            carrier: {
+                id: p.c_id,
+                name: p.c_name,
+                code: p.c_code
+            },
+            recharges
+        };
+    }));
+    return {
+        document,
+        phones: result
     };
 }

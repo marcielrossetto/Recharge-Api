@@ -1,62 +1,36 @@
-// src/repositories/recharges.repository.ts
-import { db } from "../config/pg";
+import { query } from "../config/db";
+import { CreateRechargeInput, Recharge } from "../protocols/recharge";
 
-export async function insertRecharge({
-  phone_id,
-  amount, // centavos (ex.: 2000 = R$ 20)
-}: { phone_id: number; amount: number }) {
-  const { rows } = await db.query(
-    `
-    INSERT INTO recharges (phone_id, amount_cents, value, status)
-    VALUES ($1, $2::int, $3::numeric, 'PENDING')
-    RETURNING id, phone_id, amount_cents, value, status, created_at
-    `,
-    [phone_id, amount, amount / 100] // $2 = centavos, $3 = reais
+export async function insert(data: CreateRechargeInput) {
+  // Converte o valor de reais para centavos
+  const amountCents = Math.round(data.value * 100);
+  
+  const rows = await query<Recharge>(
+    `INSERT INTO recharges (phone_id, value, amount_cents, status) 
+     VALUES ($1, $2, $3, $4) 
+     RETURNING *`,
+    [data.phone_id, data.value, amountCents, 'CONFIRMED']
   );
   return rows[0];
 }
 
-
-
-export async function findById(id: number) {
-  const { rows } = await db.query(
-    `SELECT id, phone_id, amount_cents, status, created_at
-     FROM recharges WHERE id = $1`,
-    [id]
-  );
-  return rows[0];
-}
-
-export async function listAll() {
-  const { rows } = await db.query(`
-    SELECT 
-      r.id, r.phone_id, r.amount_cents, r.value, r.status, r.created_at,
-      p.name AS client_name, p.number AS phone_number
+export async function findAllByNumber(number: string) {
+  return query<Recharge>(
+    `SELECT 
+      r.*,
+      p.number as phone_number,
+      p.name as customer_name
     FROM recharges r
     JOIN phones p ON p.id = r.phone_id
-    ORDER BY r.id DESC
-  `);
-  return rows;
+    WHERE p.number = $1
+    ORDER BY r.created_at DESC`,
+    [number]
+  );
 }
 
-
-export async function listByPhoneIds(phoneIds: number[]) {
-  const { rows } = await db.query(
-    `
-    SELECT 
-      r.id,
-      r.phone_id,
-      r.amount_cents,
-      r.status,
-      r.created_at,
-      p.number AS phone_number,
-      p.document
-    FROM recharges r
-    JOIN phones p ON p.id = r.phone_id
-    WHERE r.phone_id = ANY($1::int[])
-    ORDER BY r.id DESC
-    `,
-    [phoneIds]
+export async function listByPhoneId(phoneId: number) {
+  return query<Recharge>(
+    `SELECT * FROM recharges WHERE phone_id = $1 ORDER BY created_at DESC`,
+    [phoneId]
   );
-  return rows;
 }

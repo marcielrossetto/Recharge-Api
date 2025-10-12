@@ -34,20 +34,17 @@ var __importStar = (this && this.__importStar) || (function () {
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.createRecharge = createRecharge;
-exports.listRecharges = listRecharges;
-const repo = __importStar(require("../repositories/recharges.repository"));
+exports.listByNumber = listByNumber;
+const rechargesRepo = __importStar(require("../repositories/recharges.repository"));
 const phonesRepo = __importStar(require("../repositories/phones.repository"));
+const errorHandler_1 = require("../middlewares/errorHandler");
 async function createRecharge(data) {
-    const { phone_id, amount } = data;
-    if (!phone_id || !amount)
-        throw { status: 422, message: "Campos obrigatórios" };
-    if (amount <= 0)
-        throw { status: 422, message: "Valor inválido" };
-    const phone = await phonesRepo.findById(phone_id);
+    // Verifica se o telefone existe
+    const phone = await phonesRepo.findById(data.phone_id);
     if (!phone)
-        throw { status: 404, message: "Telefone não encontrado" };
-    return repo.insertRecharge({ phone_id, amount });
+        throw (0, errorHandler_1.notFound)("Phone not found");
+    return rechargesRepo.insert(data);
 }
-async function listRecharges() {
-    return repo.listAll();
+async function listByNumber(number) {
+    return rechargesRepo.findAllByNumber(number);
 }

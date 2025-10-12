@@ -1,20 +1,16 @@
-import * as repo from "../repositories/recharges.repository";
+import * as rechargesRepo from "../repositories/recharges.repository";
 import * as phonesRepo from "../repositories/phones.repository";
-
-type CreateRechargeInput = { phone_id: number; amount: number }; // amount = centavos
+import { CreateRechargeInput } from "../protocols/recharge";
+import { notFound } from "../middlewares/errorHandler";
 
 export async function createRecharge(data: CreateRechargeInput) {
-  const { phone_id, amount } = data;
+  // Verifica se o telefone existe
+  const phone = await phonesRepo.findById(data.phone_id);
+  if (!phone) throw notFound("Phone not found");
 
-  if (!phone_id || !amount) throw { status: 422, message: "Campos obrigatórios" };
-  if (amount <= 0) throw { status: 422, message: "Valor inválido" };
-
-  const phone = await phonesRepo.findById(phone_id);
-  if (!phone) throw { status: 404, message: "Telefone não encontrado" };
-
-  return repo.insertRecharge({ phone_id, amount });
+  return rechargesRepo.insert(data);
 }
 
-export async function listRecharges() {
-  return repo.listAll();
+export async function listByNumber(number: string) {
+  return rechargesRepo.findAllByNumber(number);
 }

@@ -1,10 +1,10 @@
 export type Carrier = {
   id: number;
   name: string;
-  code: string;
+  code: number;
 };
 
-export type NewCarrierDTO = {
+export type CreateCarrierInput = {
   name: string;
-  code: string;
+  code: number;
 };
