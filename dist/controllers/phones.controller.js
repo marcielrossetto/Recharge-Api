@@ -33,35 +33,17 @@ var __importStar = (this && this.__importStar) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.postPhone = postPhone;
-exports.getPhonesByDocument = getPhonesByDocument;
-exports.getAllPhones = getAllPhones;
+exports.getPhones = exports.postPhone = void 0;
 const phonesService = __importStar(require("../services/phones.service"));
-async function postPhone(req, res, next) {
-    try {
-        const created = await phonesService.createPhone(req.body);
-        res.status(201).send(created);
-    }
-    catch (err) {
-        next(err);
-    }
-}
-async function getPhonesByDocument(req, res, next) {
-    try {
-        const { document } = req.params;
-        const list = await phonesService.listByDocument(document);
-        res.send(list);
-    }
-    catch (err) {
-        next(err);
-    }
-}
-async function getAllPhones(req, res, next) {
-    try {
-        const list = await phonesService.listAll();
-        res.send(list);
-    }
-    catch (err) {
-        next(err);
-    }
-}
+const async_1 = require("../utils/async");
+exports.postPhone = (0, async_1.asyncHandler)(async (req, res) => {
+    const created = await phonesService.createPhone(req.body);
+    res.status(201).json(created);
+});
+exports.getPhones = (0, async_1.asyncHandler)(async (req, res) => {
+    const { document } = req.query;
+    const list = document
+        ? await phonesService.listByDocument(document)
+        : await phonesService.listAll();
+    res.json(list);
+});

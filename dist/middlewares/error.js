@@ -1,11 +1,15 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.errorHandler = errorHandler;
-function errorHandler(err, _req, res, _next) {
-    if (err?.status)
-        return res.status(err.status).send({ error: err.message });
-    if (err?.code === "23505")
-        return res.status(409).send({ error: "Conflict" }); // unique violation
-    console.error(err);
-    return res.status(500).send({ error: "Internal Server Error" });
+exports.errorMiddleware = errorMiddleware;
+function errorMiddleware(err, _req, res, _next) {
+    // normaliza erro
+    const status = Number(err?.status) || 500;
+    const message = (typeof err?.message === "string" && err.message) ||
+        (typeof err === "string" && err) ||
+        "Internal Server Error";
+    // log útil no dev
+    if (status >= 500) {
+        console.error("[ERROR]", err);
+    }
+    res.status(status).json({ error: message });
 }

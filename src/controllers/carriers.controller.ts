@@ -1,22 +1,13 @@
-import { Request, Response, NextFunction } from "express";
+import { Request, Response } from "express";
 import * as service from "../services/carriers.service";
+import { asyncHandler } from "../utils/async";
 
-export async function getCarriers(_req: Request, res: Response, next: NextFunction) {
-  try {
-    const rows = await service.listCarriers(); // <- era listAll
-    res.send(rows);
-  } catch (err) {
-    next(err);
-  }
-}
+export const getCarriers = asyncHandler(async (_req: Request, res: Response) => {
+  const rows = await service.list();
+  res.json(rows);
+});
 
-export async function postCarrier(req: Request, res: Response, next: NextFunction) {
-  try {
-    const { name, code } = req.body;
-    // service.createCarrier recebe um objeto { name, code }
-    const created = await service.createCarrier({ name, code });
-    res.status(201).send(created);
-  } catch (err) {
-    next(err);
-  }
-}
+export const postCarrier = asyncHandler(async (req: Request, res: Response) => {
+  const created = await service.createCarrier(req.body);
+  res.status(201).json(created);
+});

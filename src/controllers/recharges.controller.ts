@@ -1,21 +1,14 @@
-import { Request, Response, NextFunction } from "express";
+import { Request, Response } from "express";
 import * as rechargesService from "../services/recharges.service";
+import { asyncHandler } from "../utils/async";
 
-export async function postRecharge(req: Request, res: Response, next: NextFunction) {
-  try {
-    const created = await rechargesService.createRecharge(req.body);
-    res.status(201).send(created);
-  } catch (err) { 
-    next(err); 
-  }
-}
+export const createRecharge = asyncHandler(async (req: Request, res: Response) => {
+  const { phone_id, amount } = req.body;
+  const created = await rechargesService.createRecharge(Number(phone_id), Number(amount));
+  res.status(201).json(created);
+});
 
-export async function getRechargesByNumber(req: Request, res: Response, next: NextFunction) {
-  try {
-    const { number } = req.params;
-    const list = await rechargesService.listByNumber(number);
-    res.send(list);
-  } catch (err) { 
-    next(err); 
-  }
-}
+export const getRecharges = asyncHandler(async (_req: Request, res: Response) => {
+  const list = await rechargesService.listRecharges();
+  res.json(list);
+});

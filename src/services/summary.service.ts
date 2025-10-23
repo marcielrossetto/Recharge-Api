@@ -1,38 +1,40 @@
-import * as phonesRepo from "../repositories/phones.repository";
-import * as rechargesRepo from "../repositories/recharges.repository";
 import { query } from "../config/db";
 
-export async function getSummaryByDocument(document: string) {
-  // phones do documento + carrier
-  const phones = await query<any>(
-    `SELECT p.*, c.id AS c_id, c.name AS c_name, c.code AS c_code
-       FROM phones p
-       JOIN carriers c ON c.id = p.carrier_id
-      WHERE p.document = $1
-      ORDER BY p.created_at DESC`,
-    [document]
+type Status = "PENDING" | "CONFIRMED" | "FAILED" | "CANCELED";
+
+export async function getSummary(document?: string) {
+  const rows = await query<{
+    phone_id: number;
+    r_id: number | null;
+    r_amount: number | null;
+    r_status: Status | null;
+    r_created_at: string | null;
+  }>(
+    `
+    SELECT
+      p.id AS phone_id,
+      r.id AS r_id,
+      r.amount AS r_amount,
+      r.status AS r_status,
+      r.created_at AS r_created_at
+    FROM phones p
+    LEFT JOIN LATERAL (
+      SELECT id, phone_id, amount, status, created_at
+      FROM recharges
+      WHERE phone_id = p.id
+      ORDER BY created_at DESC
+      LIMIT 1
+    ) r ON TRUE
+    WHERE ($1::varchar IS NULL OR p.document = $1)
+    ORDER BY p.id DESC
+    `,
+    [document ?? null]
   );
 
-  const result = await Promise.all(phones.map(async (p) => {
-    const recharges = await rechargesRepo.listByPhoneId(p.id);
-    return {
-      id: p.id,
-      document: p.document,
-      number: p.number,
-      name: p.name,
-      description: p.description,
-      created_at: p.created_at,
-      carrier: {
-        id: p.c_id,
-        name: p.c_name,
-        code: p.c_code
-      },
-      recharges
-    };
+  return rows.map((row) => ({
+    phone_id: row.phone_id,
+    last_recharge: row.r_id
+      ? { id: row.r_id, phone_id: row.phone_id, amount: row.r_amount!, status: row.r_status!, created_at: row.r_created_at! }
+      : null,
   }));
-
-  return {
-    document,
-    phones: result
-  };
 }

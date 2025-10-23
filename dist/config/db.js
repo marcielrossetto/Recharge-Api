@@ -3,16 +3,23 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.pool = void 0;
 exports.query = query;
+exports.queryOne = queryOne;
+const pg_1 = __importDefault(require("pg"));
 const dotenv_1 = __importDefault(require("dotenv"));
-const pg_1 = require("pg");
 dotenv_1.default.config();
-exports.pool = new pg_1.Pool({
-    connectionString: process.env.DATABASE_URL
+process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0"; // DEV somente
+const { Pool } = pg_1.default;
+const db = new Pool({
+    connectionString: process.env.DATABASE_URL,
+    ssl: { rejectUnauthorized: false },
 });
-// use o constraint correto do pg
 async function query(text, params) {
-    const { rows } = await exports.pool.query(text, params);
-    return rows;
+    const res = await db.query(text, params);
+    return res.rows;
 }
+async function queryOne(text, params) {
+    const rows = await query(text, params);
+    return rows[0] ?? null;
+}
+exports.default = db;

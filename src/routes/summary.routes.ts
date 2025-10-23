@@ -1,6 +1,7 @@
 import { Router } from "express";
-import { getSummary } from "../controllers/summary.controller";
+import { getSummaryController } from "../controllers/summary.controller";
 
 const router = Router();
-router.get("/:document", getSummary);
+router.get("/", getSummaryController); // GET /summary?document=...
+
 export default router;

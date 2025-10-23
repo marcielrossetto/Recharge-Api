@@ -1,36 +1,35 @@
-import { query } from "../config/db";
-import { CreateRechargeInput, Recharge } from "../protocols/recharge";
+import { query, queryOne } from "../config/db";
 
-export async function insert(data: CreateRechargeInput) {
-  // Converte o valor de reais para centavos
-  const amountCents = Math.round(data.value * 100);
-  
+export type Recharge = {
+  id: number;
+  phone_id: number;
+  amount: number;
+  status: "PENDING" | "CONFIRMED" | "FAILED" | "CANCELED";
+  created_at: string;
+};
+
+export async function create(phone_id: number, amount: number): Promise<Recharge> {
   const rows = await query<Recharge>(
-    `INSERT INTO recharges (phone_id, value, amount_cents, status) 
-     VALUES ($1, $2, $3, $4) 
+    `INSERT INTO recharges (phone_id, amount, status)
+     VALUES ($1,$2,'PENDING')
      RETURNING *`,
-    [data.phone_id, data.value, amountCents, 'CONFIRMED']
+    [phone_id, amount]
   );
   return rows[0];
 }
 
-export async function findAllByNumber(number: string) {
-  return query<Recharge>(
-    `SELECT 
-      r.*,
-      p.number as phone_number,
-      p.name as customer_name
-    FROM recharges r
-    JOIN phones p ON p.id = r.phone_id
-    WHERE p.number = $1
-    ORDER BY r.created_at DESC`,
-    [number]
-  );
+export async function findAll(): Promise<Recharge[]> {
+  return query<Recharge>("SELECT * FROM recharges ORDER BY created_at DESC");
 }
 
-export async function listByPhoneId(phoneId: number) {
-  return query<Recharge>(
-    `SELECT * FROM recharges WHERE phone_id = $1 ORDER BY created_at DESC`,
-    [phoneId]
+export async function findById(id: number): Promise<Recharge | null> {
+  return queryOne<Recharge>("SELECT * FROM recharges WHERE id=$1", [id]);
+}
+
+export async function updateStatus(id: number, status: Recharge["status"]): Promise<Recharge> {
+  const rows = await query<Recharge>(
+    "UPDATE recharges SET status=$2 WHERE id=$1 RETURNING *",
+    [id, status]
   );
+  return rows[0];
 }

@@ -1,16 +1,12 @@
 import * as rechargesRepo from "../repositories/recharges.repository";
 import * as phonesRepo from "../repositories/phones.repository";
-import { CreateRechargeInput } from "../protocols/recharge";
-import { notFound } from "../middlewares/errorHandler";
 
-export async function createRecharge(data: CreateRechargeInput) {
-  // Verifica se o telefone existe
-  const phone = await phonesRepo.findById(data.phone_id);
-  if (!phone) throw notFound("Phone not found");
-
-  return rechargesRepo.insert(data);
+export async function createRecharge(phone_id: number, amount: number) {
+  const phone = await phonesRepo.findById(phone_id);
+  if (!phone) throw { status: 404, message: "phone not found" };
+  return rechargesRepo.create(phone_id, amount);
 }
 
-export async function listByNumber(number: string) {
-  return rechargesRepo.findAllByNumber(number);
+export async function listRecharges() {
+  return rechargesRepo.findAll();
 }

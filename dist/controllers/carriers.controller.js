@@ -33,26 +33,14 @@ var __importStar = (this && this.__importStar) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getCarriers = getCarriers;
-exports.postCarrier = postCarrier;
+exports.postCarrier = exports.getCarriers = void 0;
 const service = __importStar(require("../services/carriers.service"));
-async function getCarriers(_req, res, next) {
-    try {
-        const rows = await service.listCarriers(); // <- era listAll
-        res.send(rows);
-    }
-    catch (err) {
-        next(err);
-    }
-}
-async function postCarrier(req, res, next) {
-    try {
-        const { name, code } = req.body;
-        // service.createCarrier recebe um objeto { name, code }
-        const created = await service.createCarrier({ name, code });
-        res.status(201).send(created);
-    }
-    catch (err) {
-        next(err);
-    }
-}
+const async_1 = require("../utils/async");
+exports.getCarriers = (0, async_1.asyncHandler)(async (_req, res) => {
+    const rows = await service.list();
+    res.json(rows);
+});
+exports.postCarrier = (0, async_1.asyncHandler)(async (req, res) => {
+    const created = await service.createCarrier(req.body);
+    res.status(201).json(created);
+});

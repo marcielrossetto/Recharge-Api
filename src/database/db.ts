@@ -1,18 +1,14 @@
-import { Pool, QueryResult, QueryResultRow } from "pg";
-import dotenv from "dotenv";
-dotenv.config();
+import { Pool, QueryResultRow } from 'pg';
+import 'dotenv/config';
+
+if (!process.env.DATABASE_URL) throw new Error('DATABASE_URL não definida');
 
 export const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
-  ssl: process.env.NODE_ENV === "production" ? { rejectUnauthorized: false } : false
+  ssl: { rejectUnauthorized: false },
 });
 
-// Função genérica compatível com 'pg'
-export function query<T extends QueryResultRow = QueryResultRow>(
-  text: string,
-  params?: any[]
-): Promise<QueryResult<T>> {
-  return pool.query<T>(text, params);
+export async function query<T extends QueryResultRow = any>(sql: string, params?: any[]) {
+  const res = await pool.query<T>(sql, params);
+  return res.rows;
 }
-
-pool.on("error", (err) => console.error("PG Pool error:", err));

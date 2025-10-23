@@ -33,25 +33,15 @@ var __importStar = (this && this.__importStar) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.postRecharge = postRecharge;
-exports.getRechargesByNumber = getRechargesByNumber;
+exports.getRecharges = exports.createRecharge = void 0;
 const rechargesService = __importStar(require("../services/recharges.service"));
-async function postRecharge(req, res, next) {
-    try {
-        const created = await rechargesService.createRecharge(req.body);
-        res.status(201).send(created);
-    }
-    catch (err) {
-        next(err);
-    }
-}
-async function getRechargesByNumber(req, res, next) {
-    try {
-        const { number } = req.params;
-        const list = await rechargesService.listByNumber(number);
-        res.send(list);
-    }
-    catch (err) {
-        next(err);
-    }
-}
+const async_1 = require("../utils/async");
+exports.createRecharge = (0, async_1.asyncHandler)(async (req, res) => {
+    const { phone_id, amount } = req.body;
+    const created = await rechargesService.createRecharge(Number(phone_id), Number(amount));
+    res.status(201).json(created);
+});
+exports.getRecharges = (0, async_1.asyncHandler)(async (_req, res) => {
+    const list = await rechargesService.listRecharges();
+    res.json(list);
+});

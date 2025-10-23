@@ -2,28 +2,23 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.findAll = findAll;
 exports.findById = findById;
-exports.findByCode = findByCode;
 exports.findByName = findByName;
+exports.findByCode = findByCode;
 exports.create = create;
 const db_1 = require("../config/db");
 async function findAll() {
-    return (0, db_1.query)("SELECT * FROM carriers ORDER BY name ASC");
+    return (0, db_1.query)("SELECT id, name, code FROM carriers ORDER BY id");
 }
 async function findById(id) {
-    const rows = await (0, db_1.query)("SELECT * FROM carriers WHERE id = $1", [id]);
-    return rows[0] ?? null;
-}
-async function findByCode(code) {
-    const rows = await (0, db_1.query)("SELECT * FROM carriers WHERE code = $1", [code]);
-    return rows[0] ?? null;
+    return (0, db_1.queryOne)("SELECT id, name, code FROM carriers WHERE id=$1", [id]);
 }
 async function findByName(name) {
-    const rows = await (0, db_1.query)("SELECT * FROM carriers WHERE name = $1", [name]);
-    return rows[0] ?? null;
+    return (0, db_1.queryOne)("SELECT id, name, code FROM carriers WHERE LOWER(name)=LOWER($1)", [name]);
 }
-async function create(data) {
-    const rows = await (0, db_1.query)(`INSERT INTO carriers (name, code)
-     VALUES ($1, $2)
-     RETURNING *`, [data.name, data.code]);
+async function findByCode(code) {
+    return (0, db_1.queryOne)("SELECT id, name, code FROM carriers WHERE code=$1", [code]);
+}
+async function create(name, code) {
+    const rows = await (0, db_1.query)("INSERT INTO carriers (name, code) VALUES ($1,$2) RETURNING id, name, code", [name, code]);
     return rows[0];
 }

@@ -1,10 +1,9 @@
-import { Request, Response, NextFunction } from "express";
-import * as summaryService from "../services/summary.service";
+import { Request, Response } from "express";
+import { getSummary } from "../services/summary.service";
+import { asyncHandler } from "../utils/async";
 
-export async function getSummary(req: Request, res: Response, next: NextFunction) {
-  try {
-    const { document } = req.params;
-    const payload = await summaryService.getSummaryByDocument(document);
-    res.send(payload);
-  } catch (err) { next(err); }
-}
+export const getSummaryController = asyncHandler(async (req: Request, res: Response) => {
+  const { document } = req.query as { document?: string };
+  const data = await getSummary(document);
+  res.json(data);
+});

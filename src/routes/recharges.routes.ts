@@ -1,9 +1,12 @@
 import { Router } from "express";
-import { postRecharge, getRechargesByNumber } from "../controllers/recharges.controller";
-import { validate } from "../middlewares/validate";
-import { createRechargeSchema } from "../validations/recharges.schemas";
+import { createRecharge, getRecharges } from "../controllers/recharges.controller";
 
 const router = Router();
-router.post("/", validate(createRechargeSchema), postRecharge);
-router.get("/:number", getRechargesByNumber);
+
+// POST /recharges
+router.post("/", createRecharge);
+
+// GET /recharges
+router.get("/", getRecharges);
+
 export default router;

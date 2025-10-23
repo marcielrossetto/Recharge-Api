@@ -33,23 +33,18 @@ var __importStar = (this && this.__importStar) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.listCarriers = listCarriers;
+exports.list = list;
 exports.createCarrier = createCarrier;
 const repo = __importStar(require("../repositories/carriers.repository"));
-const errorHandler_1 = require("../middlewares/errorHandler");
-async function listCarriers() {
+async function list() {
     return repo.findAll();
 }
 async function createCarrier({ name, code }) {
-    if (!name?.trim())
-        throw (0, errorHandler_1.badRequest)("name is required");
-    if (!Number.isInteger(code) || code <= 0)
-        throw (0, errorHandler_1.badRequest)("code must be a positive integer");
-    const byCode = await repo.findByCode(code);
-    if (byCode)
-        throw (0, errorHandler_1.conflict)("Carrier code already exists");
     const byName = await repo.findByName(name);
     if (byName)
-        throw (0, errorHandler_1.conflict)("Carrier name already exists");
-    return repo.create({ name: name.trim(), code });
+        throw { status: 409, message: "carrier name already exists" };
+    const byCode = await repo.findByCode(code);
+    if (byCode)
+        throw { status: 409, message: "carrier code already exists" };
+    return repo.create(name.trim(), code);
 }

@@ -34,17 +34,15 @@ var __importStar = (this && this.__importStar) || (function () {
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.createRecharge = createRecharge;
-exports.listByNumber = listByNumber;
+exports.listRecharges = listRecharges;
 const rechargesRepo = __importStar(require("../repositories/recharges.repository"));
 const phonesRepo = __importStar(require("../repositories/phones.repository"));
-const errorHandler_1 = require("../middlewares/errorHandler");
-async function createRecharge(data) {
-    // Verifica se o telefone existe
-    const phone = await phonesRepo.findById(data.phone_id);
+async function createRecharge(phone_id, amount) {
+    const phone = await phonesRepo.findById(phone_id);
     if (!phone)
-        throw (0, errorHandler_1.notFound)("Phone not found");
-    return rechargesRepo.insert(data);
+        throw { status: 404, message: "phone not found" };
+    return rechargesRepo.create(phone_id, amount);
 }
-async function listByNumber(number) {
-    return rechargesRepo.findAllByNumber(number);
+async function listRecharges() {
+    return rechargesRepo.findAll();
 }

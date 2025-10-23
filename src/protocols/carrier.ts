@@ -1,10 +1,7 @@
-export type Carrier = {
+export interface Carrier {
   id: number;
   name: string;
-  code: number;
-};
+  code: number; // ✅ Mudou de string para number
+}
 
-export type CreateCarrierInput = {
-  name: string;
-  code: number;
-};
+export type CreateCarrierInput = Omit<Carrier, "id">;
