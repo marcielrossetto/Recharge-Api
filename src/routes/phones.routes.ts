@@ -1,12 +1,14 @@
 import { Router } from "express";
 import { postPhone, getPhones } from "../controllers/phones.controller";
+import { validateSchema } from "../middlewares/validate";
+import { createPhoneSchema } from "../validations/phones.schemas";
 
 const router = Router();
 
-// POST /phones
-router.post("/", postPhone);
+// POST /phones (com validação JOI)
+router.post("/", validateSchema(createPhoneSchema), postPhone);
 
-// GET /phones  (opcional ?document=12345678901)
+// GET /phones (?document=12345678901)
 router.get("/", getPhones);
 
 export default router;

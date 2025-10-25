@@ -6,5 +6,5 @@ const validate_1 = require("../middlewares/validate");
 const carriers_schemas_1 = require("../validations/carriers.schemas");
 const router = (0, express_1.Router)();
 router.get("/", carriers_controller_1.getCarriers);
-router.post("/", (0, validate_1.validate)(carriers_schemas_1.createCarrierSchema), carriers_controller_1.postCarrier);
+router.post("/", (0, validate_1.validateSchema)(carriers_schemas_1.createCarrierSchema), carriers_controller_1.postCarrier);
 exports.default = router;

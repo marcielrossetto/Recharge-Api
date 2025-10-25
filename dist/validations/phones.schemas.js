@@ -10,5 +10,5 @@ exports.createPhoneSchema = joi_1.default.object({
     number: joi_1.default.string().pattern(/^\d{10,11}$/).required(),
     name: joi_1.default.string().min(2).max(100).required(),
     description: joi_1.default.string().min(1).required(),
-    carrier_id: joi_1.default.number().integer().positive().required()
+    carrier_id: joi_1.default.number().integer().positive().required(),
 });

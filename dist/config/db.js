@@ -5,14 +5,14 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.query = query;
 exports.queryOne = queryOne;
+// src/config/db.ts
 const pg_1 = __importDefault(require("pg"));
 const dotenv_1 = __importDefault(require("dotenv"));
 dotenv_1.default.config();
-process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0"; // DEV somente
 const { Pool } = pg_1.default;
 const db = new Pool({
     connectionString: process.env.DATABASE_URL,
-    ssl: { rejectUnauthorized: false },
+    ssl: { rejectUnauthorized: false }
 });
 async function query(text, params) {
     const res = await db.query(text, params);

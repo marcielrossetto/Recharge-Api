@@ -1,7 +1,7 @@
 export interface Recharge {
   id: number;
   phone_id: number;
-  value: number;
+  amount: number;
   created_at: Date;
 }
 

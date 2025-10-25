@@ -6,6 +6,6 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.createCarrierSchema = void 0;
 const joi_1 = __importDefault(require("joi"));
 exports.createCarrierSchema = joi_1.default.object({
-    name: joi_1.default.string().required().min(2).max(255),
-    code: joi_1.default.number().integer().required() // ✅ Mudou de string para number
+    name: joi_1.default.string().min(2).max(255).required(),
+    code: joi_1.default.number().integer().required(),
 });

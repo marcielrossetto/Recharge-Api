@@ -7,5 +7,5 @@ exports.createRechargeSchema = void 0;
 const joi_1 = __importDefault(require("joi"));
 exports.createRechargeSchema = joi_1.default.object({
     phone_id: joi_1.default.number().integer().positive().required(),
-    value: joi_1.default.number().min(10).max(1000).required() // Entre R$ 10,00 e R$ 1.000,00
+    amount: joi_1.default.number().min(10).max(1000).required(), // <- trocado para amount
 });
