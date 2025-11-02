@@ -1,20 +1,29 @@
 import { Request, Response, NextFunction } from "express";
 
-export function errorMiddleware(
-  err: any,
-  _req: Request,
-  res: Response,
-  _next: NextFunction
-) {
-  const status = Number(err?.status) || 500;
-  const message =
-    typeof err?.message === "string"
-      ? err.message
-      : typeof err === "string"
-      ? err
-      : JSON.stringify(err);
+export function errorHandler(err: any, _req: Request, res: Response, _next: NextFunction) {
+  // status padrão
+  let status = Number(err?.status) || 500;
 
-  if (status >= 500) console.error("[ERROR]", err);
+  // mensagem padrão
+  let message: string | string[] = "Internal Server Error";
 
-  res.status(status).json({ error: message });
+  // Joi
+  if (err?.isJoi || err?.details) {
+    status = 422;
+    message = (err.details ?? []).map((d: any) => d.message);
+  }
+  // Error nativa
+  else if (err instanceof Error && err.message) {
+    message = err.message;
+  }
+  // Objeto com message
+  else if (typeof err?.message === "string") {
+    message = err.message;
+  }
+  // string direta
+  else if (typeof err === "string") {
+    message = err;
+  }
+
+  return res.status(status).json({ error: message });
 }

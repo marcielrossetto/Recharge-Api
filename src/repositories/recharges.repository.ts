@@ -11,7 +11,7 @@ export type Recharge = {
 export async function create(phone_id: number, amount: number): Promise<Recharge> {
   const rows = await query<Recharge>(
     `INSERT INTO recharges (phone_id, amount, status)
-     VALUES ($1,$2,'PENDING')
+     VALUES ($1, $2, 'PENDING')
      RETURNING *`,
     [phone_id, amount]
   );
@@ -32,4 +32,14 @@ export async function updateStatus(id: number, status: Recharge["status"]): Prom
     [id, status]
   );
   return rows[0];
+}
+
+// ✅ NOVA FUNÇÃO — para buscar recargas por phone_id
+export async function findByPhoneId(phone_id: number): Promise<Recharge[]> {
+  return query<Recharge>(
+    `SELECT * FROM recharges
+     WHERE phone_id = $1
+     ORDER BY created_at DESC`,
+    [phone_id]
+  );
 }

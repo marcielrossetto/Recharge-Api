@@ -5,10 +5,7 @@ import { createPhoneSchema } from "../validations/phones.schemas";
 
 const router = Router();
 
-// POST /phones (com validação JOI)
 router.post("/", validateSchema(createPhoneSchema), postPhone);
-
-// GET /phones (?document=12345678901)
-router.get("/", getPhones);
+router.get("/:document", getPhones); // << antes era GET "/"
 
 export default router;

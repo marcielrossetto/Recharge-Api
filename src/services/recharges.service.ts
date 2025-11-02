@@ -10,3 +10,10 @@ export async function createRecharge(phone_id: number, amount: number) {
 export async function listRecharges() {
   return rechargesRepo.findAll();
 }
+export async function listByNumber(number: string) {
+  const phone = await phonesRepo.findByNumber(number);
+  if (!phone) throw { status: 404, message: "phone not found" };
+
+  const recharges = await rechargesRepo.findByPhoneId(phone.id);
+  return recharges;
+}

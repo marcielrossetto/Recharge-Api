@@ -8,9 +8,7 @@ export const postPhone = asyncHandler(async (req: Request, res: Response) => {
 });
 
 export const getPhones = asyncHandler(async (req: Request, res: Response) => {
-  const { document } = req.query as { document?: string };
-  const list = document
-    ? await phonesService.listByDocument(document)
-    : await phonesService.listAll();
+  const { document } = req.params as { document: string }; // << antes usava query
+  const list = await phonesService.listByDocument(document);
   res.json(list);
 });

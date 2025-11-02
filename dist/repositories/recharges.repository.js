@@ -4,10 +4,11 @@ exports.create = create;
 exports.findAll = findAll;
 exports.findById = findById;
 exports.updateStatus = updateStatus;
+exports.findByPhoneId = findByPhoneId;
 const db_1 = require("../config/db");
 async function create(phone_id, amount) {
     const rows = await (0, db_1.query)(`INSERT INTO recharges (phone_id, amount, status)
-     VALUES ($1,$2,'PENDING')
+     VALUES ($1, $2, 'PENDING')
      RETURNING *`, [phone_id, amount]);
     return rows[0];
 }
@@ -20,4 +21,10 @@ async function findById(id) {
 async function updateStatus(id, status) {
     const rows = await (0, db_1.query)("UPDATE recharges SET status=$2 WHERE id=$1 RETURNING *", [id, status]);
     return rows[0];
+}
+// ✅ NOVA FUNÇÃO — para buscar recargas por phone_id
+async function findByPhoneId(phone_id) {
+    return (0, db_1.query)(`SELECT * FROM recharges
+     WHERE phone_id = $1
+     ORDER BY created_at DESC`, [phone_id]);
 }

@@ -5,10 +5,7 @@ import { createRechargeSchema } from "../validations/recharges.schemas";
 
 const router = Router();
 
-// POST /recharges (com validação JOI)
 router.post("/", validateSchema(createRechargeSchema), createRecharge);
-
-// GET /recharges
-router.get("/", getRecharges);
+router.get("/:number", getRecharges); // << antes era GET "/"
 
 export default router;

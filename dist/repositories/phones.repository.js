@@ -7,20 +7,25 @@ exports.create = create;
 exports.listWithCarrier = listWithCarrier;
 exports.findAllByDocument = findAllByDocument;
 const db_1 = require("../config/db");
+const onlyDigits = (v) => (v ?? "").toString().replace(/\D/g, "");
 async function countByDocument(document) {
-    const rows = await (0, db_1.query)("SELECT COUNT(*)::text AS count FROM phones WHERE document=$1", [document]);
+    const doc = onlyDigits(document);
+    const rows = await (0, db_1.query)("SELECT COUNT(*)::text AS count FROM phones WHERE document=$1", [doc]);
     return Number(rows[0]?.count ?? 0);
 }
 async function findByNumber(number) {
-    return (0, db_1.queryOne)("SELECT * FROM phones WHERE number=$1", [number]);
+    const num = onlyDigits(number);
+    return (0, db_1.queryOne)("SELECT * FROM phones WHERE number=$1", [num]);
 }
 async function findById(id) {
     return (0, db_1.queryOne)("SELECT * FROM phones WHERE id=$1", [id]);
 }
 async function create(data) {
+    const doc = onlyDigits(data.document);
+    const num = onlyDigits(data.number);
     const rows = await (0, db_1.query)(`INSERT INTO phones (document, name, description, number, carrier_id)
      VALUES ($1,$2,$3,$4,$5)
-     RETURNING *`, [data.document, data.name, data.description, data.number, data.carrier_id]);
+     RETURNING *`, [doc, data.name, data.description, num, data.carrier_id]);
     return rows[0];
 }
 async function listWithCarrier() {
@@ -30,5 +35,6 @@ async function listWithCarrier() {
       ORDER BY p.id DESC`);
 }
 async function findAllByDocument(document) {
-    return (0, db_1.query)(`SELECT * FROM phones WHERE document=$1 ORDER BY id DESC`, [document]);
+    const doc = onlyDigits(document);
+    return (0, db_1.query)(`SELECT * FROM phones WHERE document=$1 ORDER BY id DESC`, [doc]);
 }

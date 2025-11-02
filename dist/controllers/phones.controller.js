@@ -41,9 +41,7 @@ exports.postPhone = (0, async_1.asyncHandler)(async (req, res) => {
     res.status(201).json(created);
 });
 exports.getPhones = (0, async_1.asyncHandler)(async (req, res) => {
-    const { document } = req.query;
-    const list = document
-        ? await phonesService.listByDocument(document)
-        : await phonesService.listAll();
+    const { document } = req.params; // << antes usava query
+    const list = await phonesService.listByDocument(document);
     res.json(list);
 });

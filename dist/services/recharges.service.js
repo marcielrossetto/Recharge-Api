@@ -35,6 +35,7 @@ var __importStar = (this && this.__importStar) || (function () {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.createRecharge = createRecharge;
 exports.listRecharges = listRecharges;
+exports.listByNumber = listByNumber;
 const rechargesRepo = __importStar(require("../repositories/recharges.repository"));
 const phonesRepo = __importStar(require("../repositories/phones.repository"));
 async function createRecharge(phone_id, amount) {
@@ -45,4 +46,11 @@ async function createRecharge(phone_id, amount) {
 }
 async function listRecharges() {
     return rechargesRepo.findAll();
+}
+async function listByNumber(number) {
+    const phone = await phonesRepo.findByNumber(number);
+    if (!phone)
+        throw { status: 404, message: "phone not found" };
+    const recharges = await rechargesRepo.findByPhoneId(phone.id);
+    return recharges;
 }

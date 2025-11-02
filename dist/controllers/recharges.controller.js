@@ -37,11 +37,12 @@ exports.getRecharges = exports.createRecharge = void 0;
 const rechargesService = __importStar(require("../services/recharges.service"));
 const async_1 = require("../utils/async");
 exports.createRecharge = (0, async_1.asyncHandler)(async (req, res) => {
-    const { phone_id, amount } = req.body;
+    const { phone_id, amount } = req.body; // mantém seu POST como está
     const created = await rechargesService.createRecharge(Number(phone_id), Number(amount));
     res.status(201).json(created);
 });
-exports.getRecharges = (0, async_1.asyncHandler)(async (_req, res) => {
-    const list = await rechargesService.listRecharges();
+exports.getRecharges = (0, async_1.asyncHandler)(async (req, res) => {
+    const number = (req.params.number ?? "").replace(/\D/g, "");
+    const list = await rechargesService.listByNumber(number);
     res.json(list);
 });
