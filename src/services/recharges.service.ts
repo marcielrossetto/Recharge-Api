@@ -7,13 +7,12 @@ export async function createRecharge(phone_id: number, amount: number) {
   return rechargesRepo.create(phone_id, amount);
 }
 
-export async function listRecharges() {
-  return rechargesRepo.findAll();
-}
 export async function listByNumber(number: string) {
   const phone = await phonesRepo.findByNumber(number);
   if (!phone) throw { status: 404, message: "phone not found" };
+  return rechargesRepo.findByPhoneId(phone.id); // ← devolve TODAS
+}
 
-  const recharges = await rechargesRepo.findByPhoneId(phone.id);
-  return recharges;
+export async function listRecharges() {
+  return rechargesRepo.findAll(); // ← /recharges (todas do banco)
 }

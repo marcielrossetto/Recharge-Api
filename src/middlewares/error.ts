@@ -1,29 +1,47 @@
 import { Request, Response, NextFunction } from "express";
 
 export function errorHandler(err: any, _req: Request, res: Response, _next: NextFunction) {
+  // 🔹 log detalhado no terminal (sem [object Object])
+  console.error("⚠️  ERROR:", err.stack ?? JSON.stringify(err, null, 2));
+
   // status padrão
-  let status = Number(err?.status) || 500;
+  const status = Number(err?.status) || 500;
 
   // mensagem padrão
   let message: string | string[] = "Internal Server Error";
 
-  // Joi
+  // 🔹 validação Joi
   if (err?.isJoi || err?.details) {
-    status = 422;
     message = (err.details ?? []).map((d: any) => d.message);
+    return res.status(422).json({
+      error: {
+        name: "ValidationError",
+        count: message.length,
+        details: message,
+      },
+    });
   }
-  // Error nativa
-  else if (err instanceof Error && err.message) {
+
+  // 🔹 Error nativa do JS
+  if (err instanceof Error && err.message) {
     message = err.message;
   }
-  // Objeto com message
+
+  // 🔹 objeto simples com "message"
   else if (typeof err?.message === "string") {
     message = err.message;
   }
-  // string direta
+
+  // 🔹 string direta
   else if (typeof err === "string") {
     message = err;
   }
 
-  return res.status(status).json({ error: message });
+  // 🔹 resposta final
+  return res.status(status).json({
+    error: {
+      name: err?.name ?? "Error",
+      message,
+    },
+  });
 }

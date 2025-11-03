@@ -26,16 +26,14 @@ CREATE TABLE IF NOT EXISTS phones (
   created_at TIMESTAMP NOT NULL DEFAULT NOW()
 );
 
--- Índice para buscar telefones por CPF
-CREATE INDEX IF NOT EXISTS idx_phones_document ON phones(document);
-
 -- Tabela de recargas
 CREATE TABLE IF NOT EXISTS recharges (
   id SERIAL PRIMARY KEY,
   phone_id INTEGER NOT NULL REFERENCES phones(id),
-  value NUMERIC(10,2) NOT NULL CHECK (value >= 10 AND value <= 1000),
+  amount NUMERIC(10,2) NOT NULL CHECK (amount >= 10 AND amount <= 1000),
+  status VARCHAR(20) NOT NULL DEFAULT 'PENDING'
+         CHECK (status IN ('PENDING','CONFIRMED','FAILED','CANCELED')),
   created_at TIMESTAMP NOT NULL DEFAULT NOW()
 );
 
--- Índice para buscar recargas por telefone
 CREATE INDEX IF NOT EXISTS idx_recharges_phone_id ON recharges(phone_id);

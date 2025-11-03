@@ -34,12 +34,11 @@ export async function updateStatus(id: number, status: Recharge["status"]): Prom
   return rows[0];
 }
 
-// ✅ NOVA FUNÇÃO — para buscar recargas por phone_id
-export async function findByPhoneId(phone_id: number): Promise<Recharge[]> {
+export async function findByPhoneId(phone_id: number) {
   return query<Recharge>(
     `SELECT * FROM recharges
      WHERE phone_id = $1
      ORDER BY created_at DESC`,
     [phone_id]
-  );
+  ); // ← sem LIMIT
 }
